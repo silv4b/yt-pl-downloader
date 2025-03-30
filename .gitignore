@@ -1,6 +1,7 @@
 # Ignore build artifacts
 build/
 dist/
+tools/
 *.spec
 
 # Ignore virtual environment folder
@@ -18,5 +19,6 @@ Thumbs.db
 # Other local configuration files (if any)
 .venv
 .git
+.vscode
 
 downloads

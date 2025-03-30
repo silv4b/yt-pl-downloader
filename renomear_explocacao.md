@@ -198,7 +198,8 @@ def renomear_videos(caminho_pasta, titulos):
 
                 # Verifica se o nome do arquivo (sem extensão e normalizado) está no dicionário de títulos
                 if nome_sem_extensao_normalizado in titulos:
-                    novo_nome = titulos[nome_sem_extensao_normalizado] + extensao  # Mantém a extensão original
+                    # Mantém a extensão original
+                    novo_nome = titulos[nome_sem_extensao_normalizado] + extensao
                     # Substitui caracteres inválidos no novo nome
                     novo_nome = normalizar_texto(novo_nome)
                     novo_caminho = os.path.join(caminho_pasta, novo_nome)
@@ -212,18 +213,15 @@ def renomear_videos(caminho_pasta, titulos):
         print(f"Erro ao renomear os vídeos: {e}")
 
 if __name__ == "__main__":
-    # Solicita o caminho da pasta ao usuário
     caminho_pasta = input("Digite o caminho da pasta onde estão os vídeos e o arquivo titulos.txt: ")
 
     # Verifica se o caminho da pasta existe
     if not os.path.isdir(caminho_pasta):
         print(f"Erro: A pasta '{caminho_pasta}' não existe.")
     else:
-        # Lê os títulos do arquivo titulos.txt na pasta especificada
         titulos = ler_titulos(caminho_pasta)
 
         if titulos:
-            # Renomeia os vídeos
             renomear_videos(caminho_pasta, titulos)
         else:
             print("Nenhum título foi lido do arquivo titulos.txt.")
