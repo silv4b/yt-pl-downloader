@@ -1,6 +1,4 @@
-# YouTube Playlist Downloader ✨
-
-> Projeto baseado no design de [Dhananjay Porwal](https://github.com/DhananjayPorwal/youtube-playlist-downloader).
+# YouTube Playlist Downloader
 
 Este repositório contém um projeto em Python para baixar todos os vídeos de uma playlist
  do YouTube. O projeto agora inclui apenas a Interface de Linha de Comando (CLI).
@@ -65,6 +63,16 @@ Este repositório contém um projeto em Python para baixar todos os vídeos de u
     pip install -r requirements.txt
     ```
 
+## Build
+
+Para usar o script como um executável, basta executar o comando a seguir:
+
+```bash
+pyinstaller --onefile playlist_downloader.py
+```
+
+Serão criadas duas pastas, `build` e `dist`, dentro da segunda pasta estará o executável, podendo ser usado em qualquer pasta em que seja mantido.
+
 ## Uso
 
 ### Interface de Linha de Comando (CLI)
@@ -92,3 +100,5 @@ Este repositório contém um projeto em Python para baixar todos os vídeos de u
 ## Fontes
 
 [Documentação do yt_dlp](https://github.com/yt-dlp/yt-dlp)
+
+> Projeto baseado no design de [Dhananjay Porwal](https://github.com/DhananjayPorwal/youtube-playlist-downloader).
