@@ -20,6 +20,7 @@ def sanitize_filename(filename: str) -> str:
 
 
 def make_download_folder(folder: str) -> None:
+    """Verifica se existe a pasta de downloads onde são organizadas as playlists baixadas, se não existir, a pasta é criada."""
     print("Verificando se pasta de downloads existe ...")
     sleep(1)
     if not os.path.exists(folder):
@@ -34,7 +35,8 @@ def make_download_folder(folder: str) -> None:
 def main() -> None:
     make_download_folder("downloads")
 
-    link = input("URL da Playlist do YT ✨: ")
+    download_dir = "downloads"
+    link = input("URL da Playlist do YouTube ✨: ")
 
     ydl_opts = {
         "format": "bestvideo+bestaudio/best",
@@ -52,7 +54,6 @@ def main() -> None:
             exit(1)
 
         playlist_title = sanitize_filename(playlist_info["title"])
-        download_dir = "downloads"
         playlist_path = os.path.join(download_dir, playlist_title)
 
         os.makedirs(playlist_path, exist_ok=True)
