@@ -1,16 +1,17 @@
 import os
+from time import sleep
 import yt_dlp
 import re
 import unicodedata
 
 
-def remove_accents(text):
+def remove_accents(text: str) -> str:
     """Remove acentos de caracteres Unicode."""
     normalized_text = unicodedata.normalize("NFKD", text)
     return "".join([c for c in normalized_text if not unicodedata.combining(c)])
 
 
-def sanitize_filename(filename):
+def sanitize_filename(filename: str) -> str:
     """Normaliza e sanitiza nomes de arquivos removendo acentos, espaços e caracteres inválidos."""
     filename = remove_accents(filename)
     filename = re.sub(r"[^\w\s-]", "", filename)  # Remove caracteres especiais
@@ -18,64 +19,72 @@ def sanitize_filename(filename):
     return filename.strip()
 
 
-link = input("URL da Playlist do YT: ✨ ")
+def make_download_folder(folder: str) -> None:
+    print("Verificando se pasta de downloads existe ...")
+    sleep(1)
+    if not os.path.exists(folder):
+        print("Pasta de download não definida!\nCriando ...")
+        sleep(1)
+        os.makedirs(folder)
+        print(f"Pasta de download {folder} criada ✅")
+    else:
+        print("Pasta de download definida! ✅")
 
-ydl_opts = {
-    "format": "bestvideo+bestaudio/best",
-    "merge_output_format": "mp4",
-    "noplaylist": False,
-    "quiet": False,
-    "postprocessors": [{"key": "FFmpegVideoConvertor", "preferedformat": "mp4"}],
-}
 
-with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-    try:
-        playlist_info = ydl.extract_info(link, download=False)
-    except Exception as e:
-        print(f"Erro ao extrair informação da playlist: {e}")
-        exit(1)
+def main() -> None:
+    make_download_folder("downloads")
 
-    playlist_title = sanitize_filename(playlist_info["title"])
-    download_dir = "downloads"
-    playlist_path = os.path.join(download_dir, playlist_title)
+    link = input("URL da Playlist do YT ✨: ")
 
-    os.makedirs(playlist_path, exist_ok=True)
+    ydl_opts = {
+        "format": "bestvideo+bestaudio/best",
+        "merge_output_format": "mp4",
+        "noplaylist": False,
+        "quiet": False,
+        "postprocessors": [{"key": "FFmpegVideoConvertor", "preferedformat": "mp4"}],
+    }
 
-    total_video_count = len(playlist_info["entries"])
-    print("\nTotal de vídeos na playlist: 🎦", total_video_count)
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        try:
+            playlist_info = ydl.extract_info(link, download=False)
+        except Exception as e:
+            print(f"Erro ao extrair informação da playlist: {e}")
+            exit(1)
 
-    new_names = []
+        playlist_title = sanitize_filename(playlist_info["title"])
+        download_dir = "downloads"
+        playlist_path = os.path.join(download_dir, playlist_title)
 
-    for index, video in enumerate(playlist_info["entries"], start=1):
-        sanitized_title = sanitize_filename(video["title"])
-        temp_filename = f"{index:02d}_{sanitized_title}.mp4"
-        temp_filepath = os.path.join(playlist_path, temp_filename)
+        os.makedirs(playlist_path, exist_ok=True)
 
-        ydl_opts["outtmpl"] = temp_filepath
+        total_video_count = len(playlist_info["entries"])
+        print("\nTotal de vídeos na playlist: 🎦", total_video_count)
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl2:
-            try:
-                print(f"\nBaixando ({index}/{total_video_count}): {video['title']}")
-                ydl2.download([video["webpage_url"]])
-                print(f"✅ Baixado: {video['title']} successfully!")
-                print(f"📉 Vídeos restantes: {total_video_count - index}")
+        new_names = []
 
-                new_name = f"{index} - {sanitized_title}.mp4"
-                new_names.append((temp_filepath, os.path.join(playlist_path, new_name)))
-            except Exception as e:
-                print(f"❌ Erro ao baixar {video['title']}: {e}")
+        for index, video in enumerate(playlist_info["entries"], start=1):
+            sanitized_title = sanitize_filename(video["title"])
+            temp_filename = f"{index:02d}_{sanitized_title}.mp4"
+            temp_filepath = os.path.join(playlist_path, temp_filename)
 
-    # for old_name, new_name in new_names:
-    #     try:
-    #         if os.path.exists(old_name):
-    #             os.rename(old_name, new_name)
-    #             print(f"✅ Renomeado: {old_name} -> {new_name}")
-    #         else:
-    #             print(f"❌ Erro: Arquivo {old_name} não encontrado")
-    #     except Exception as e:
-    #         print(f"❌ Erro ao renomear {old_name}: {e}")
+            ydl_opts["outtmpl"] = temp_filepath
 
-print("\n" + "=" * 40)
-print("🎉 Todos os vídeos baixados e renomeados com sucesso! 🎉")
-print("=" * 40)
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl2:
+                try:
+                    print(f"\nBaixando ({index}/{total_video_count}): {video['title']}")
+                    ydl2.download([video["webpage_url"]])
+                    print(f"✅ Baixado: {video['title']} successfully!")
+                    print(f"📉 Vídeos restantes: {total_video_count - index}")
 
+                    new_name = f"{index} - {sanitized_title}.mp4"
+                    new_names.append(
+                        (temp_filepath, os.path.join(playlist_path, new_name))
+                    )
+                except Exception as e:
+                    print(f"❌ Erro ao baixar {video['title']}: {e}")
+
+    print("🎉 Todos os vídeos baixados e renomeados com sucesso! 🎉")
+
+
+if __name__ == "__main__":
+    main()
