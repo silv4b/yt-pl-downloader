@@ -28,30 +28,26 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller youtube-dl ffmpeg-python
 
-      - name: Build Executable (Linux)
-        if: matrix.os == 'ubuntu-latest'
+      - name: Build and Prepare Release Assets
         run: |
+          # Build the executable
           pyinstaller --onefile --name playlist-downloader playlist_downloader.py
+          
+          # Create release assets directory
           mkdir -p release_assets
-          mv dist/playlist-downloader release_assets/playlist-downloader-linux
-          chmod +x release_assets/playlist-downloader-linux
+          
+          # Move and rename the executable
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            mv dist/playlist-downloader release_assets/playlist-downloader-linux
+            chmod +x release_assets/playlist-downloader-linux
+          else
+            mv dist/playlist-downloader.exe release_assets/playlist-downloader-windows.exe
+          fi
 
-      - name: Build Executable (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          pyinstaller --onefile --name playlist-downloader playlist_downloader.py
-          mkdir release_assets
-          move dist\playlist-downloader.exe release_assets\playlist-downloader-windows.exe
-
-      - name: Verify files
-        run: |
-          echo "Generated files:"
-          ls -la release_assets/ || dir release_assets
-
-      - name: Upload artifacts
+      - name: Upload Release Assets
         uses: actions/upload-artifact@v4
         with:
-          name: executables-${{ matrix.os }}
+          name: release-assets-${{ matrix.os }}
           path: release_assets/
           retention-days: 1
 
@@ -62,25 +58,25 @@ jobs:
       contents: write
 
     steps:
-      - name: Download all artifacts
+      - name: Download All Assets
         uses: actions/download-artifact@v4
         with:
-          path: combined_artifacts
-          pattern: executables-*
+          path: release_assets
+          pattern: release-assets-*
           merge-multiple: true
 
-      - name: List files for debug
+      - name: Verify Assets
         run: |
-          echo "Files available for release:"
-          find combined_artifacts -type f -exec ls -la {} \;
+          echo "Files to be released:"
+          ls -la release_assets/
 
-      - name: Create Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
           files: |
-            combined_artifacts/executables-ubuntu-latest/playlist-downloader-linux
-            combined_artifacts/executables-windows-latest/playlist-downloader-windows.exe
+            release_assets/playlist-downloader-linux
+            release_assets/playlist-downloader-windows.exe
           draft: false
           prerelease: false
           fail_on_unmatched_files: true
