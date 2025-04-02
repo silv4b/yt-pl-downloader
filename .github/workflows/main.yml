@@ -28,20 +28,30 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller youtube-dl ffmpeg-python
 
-      - name: Build and Prepare Release Assets
+      - name: Build and Prepare Release Assets (Linux)
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          # Build the executable
           pyinstaller --onefile --name playlist-downloader playlist_downloader.py
-          
-          # Create release assets directory
           mkdir -p release_assets
-          
-          # Move and rename the executable
-          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            mv dist/playlist-downloader release_assets/playlist-downloader-linux
-            chmod +x release_assets/playlist-downloader-linux
+          mv dist/playlist-downloader release_assets/playlist-downloader-linux
+          chmod +x release_assets/playlist-downloader-linux
+          echo "Linux build complete"
+
+      - name: Build and Prepare Release Assets (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          pyinstaller --onefile --name playlist-downloader playlist_downloader.py
+          mkdir release_assets
+          move dist\playlist-downloader.exe release_assets\playlist-downloader-windows.exe
+          echo "Windows build complete"
+
+      - name: Verify Files
+        run: |
+          echo "Generated files in release_assets:"
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            ls -la release_assets/
           else
-            mv dist/playlist-downloader.exe release_assets/playlist-downloader-windows.exe
+            dir release_assets
           fi
 
       - name: Upload Release Assets
@@ -64,11 +74,6 @@ jobs:
           path: release_assets
           pattern: release-assets-*
           merge-multiple: true
-
-      - name: Verify Assets
-        run: |
-          echo "Files to be released:"
-          ls -la release_assets/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
