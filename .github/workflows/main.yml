@@ -32,32 +32,27 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           pyinstaller --onefile --name playlist-downloader playlist_downloader.py
-          mv dist/playlist-downloader dist/playlist-downloader-linux
-          chmod +x dist/playlist-downloader-linux
+          mkdir -p release_assets
+          mv dist/playlist-downloader release_assets/playlist-downloader-linux
+          chmod +x release_assets/playlist-downloader-linux
 
       - name: Build Executable (Windows)
         if: matrix.os == 'windows-latest'
         run: |
           pyinstaller --onefile --name playlist-downloader playlist_downloader.py
-          move dist\playlist-downloader.exe dist\playlist-downloader-windows.exe
+          mkdir release_assets
+          move dist\playlist-downloader.exe release_assets\playlist-downloader-windows.exe
 
-      - name: Verify files (Linux)
-        if: matrix.os == 'ubuntu-latest'
+      - name: Verify files
         run: |
-          echo "Generated files (Linux):"
-          ls -la dist/
-
-      - name: Verify files (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          echo "Generated files (Windows):"
-          dir dist/
+          echo "Generated files:"
+          ls -la release_assets/ || dir release_assets
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: executables-${{ matrix.os }}
-          path: dist/
+          path: release_assets/
           retention-days: 1
 
   release:
@@ -67,21 +62,27 @@ jobs:
       contents: write
 
     steps:
-      - name: Download artifacts
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          path: ./artifacts
+          path: combined_artifacts
           pattern: executables-*
           merge-multiple: true
+
+      - name: List files for debug
+        run: |
+          echo "Files available for release:"
+          find combined_artifacts -type f -exec ls -la {} \;
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
           files: |
-            artifacts/executables-ubuntu-latest/playlist-downloader-linux
-            artifacts/executables-windows-latest/playlist-downloader-windows.exe
+            combined_artifacts/executables-ubuntu-latest/playlist-downloader-linux
+            combined_artifacts/executables-windows-latest/playlist-downloader-windows.exe
           draft: false
           prerelease: false
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_REPO_ACTION }}
