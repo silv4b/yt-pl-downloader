@@ -7,45 +7,41 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}  # Matriz de sistemas operacionais
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]  # Linux e Windows
+        os: [ubuntu-latest, windows-latest]
     permissions:
-      contents: write  # Permite criar releases
+      contents: write
 
     steps:
-      # Passo 1: Baixar o código do repositório
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Passo 2: Configurar Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      # Passo 3: Instalar dependências (PyInstaller)
-      - name: Install PyInstaller
-        run: pip install pyinstaller
+      - name: Install dependencies
+        run: pip install pyinstaller youtube-dl ffmpeg-python
 
-      # Passo 4: Gerar o executável
       - name: Build Executable
         run: |
           pyinstaller --onefile playlist_downloader.py
-          # Renomeia o executável conforme o OS
+          # Ajusta o nome do executável para Linux
           if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            mv dist/playlist_downloader dist/playlist_downloader
-          elif [ "${{ matrix.os }}" == "windows-latest" ]; then
-            mv dist/playlist_downloader.exe dist/playlist_downloader.exe
+            mv dist/playlist_downloader dist/playlist-downloader-linux
           fi
+          # O Windows já gera com .exe automaticamente
 
-      # Passo 5: Enviar executáveis para a Release do GitHub
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            dist/playlist_downloader
+            dist/playlist-downloader-linux
             dist/playlist_downloader.exe
+          tag_name: ${{ github.ref }}
+          draft: false
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_REPO_ACTION }}  # Token automático do GitHub
+          GITHUB_TOKEN: ${{ secrets.TOKEN_REPO_ACTION }}
