@@ -30,4 +30,4 @@ jobs:
           files: dist/*  # Caminho para o executável gerado
           draft: false   # Publica a release imediatamente (true para rascunho)
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Token automático do GitHub
+          GITHUB_TOKEN: ${{ secrets.TOKEN_REPO_ACTION }}  # Token automático do GitHub
