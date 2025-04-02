@@ -32,7 +32,7 @@ jobs:
       # Passo 4: Gerar o executável
       - name: Build Executable
         run: |
-          pyinstaller --onefile src/playlist_downloader.py
+          pyinstaller --onefile playlist_downloader.py
           # Renomeia o executável conforme o OS
           if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
             mv dist/playlist_downloader dist/playlist_downloader
@@ -45,7 +45,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            dist/app-linux
-            dist/app-windows.exe
+            dist/playlist_downloader
+            dist/playlist_downloader.exe
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_REPO_ACTION }}  # Token automático do GitHub
