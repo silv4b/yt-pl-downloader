@@ -28,13 +28,18 @@ jobs:
 
       - name: Build Windows Executable
         run: |
-          pyinstaller --onefile --name playlist-downloader ^
-            --hidden-import='yt_dlp' ^
-            --hidden-import='ffmpeg' ^
-            --collect-all yt_dlp ^
-            --collect-all ffmpeg ^
-            --add-data ".;." ^
-            playlist_downloader.py
+          $pyinstallerCmd = @(
+            "pyinstaller",
+            "--onefile",
+            "--name=playlist-downloader",
+            "--hidden-import=yt_dlp",
+            "--hidden-import=ffmpeg",
+            "--collect-all=yt_dlp",
+            "--collect-all=ffmpeg",
+            "--add-data=.;.",
+            "playlist_downloader.py"
+          ) -join " "
+          Invoke-Expression $pyinstallerCmd
           
           mkdir release_assets
           move dist\playlist-downloader.exe release_assets\playlist-downloader-windows.exe
