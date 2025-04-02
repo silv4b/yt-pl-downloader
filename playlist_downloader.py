@@ -1,8 +1,9 @@
 import os
-from time import sleep
-import yt_dlp
 import re
+import subprocess
+import sys
 import unicodedata
+import yt_dlp
 
 
 def remove_accents(text: str) -> str:
@@ -12,31 +13,92 @@ def remove_accents(text: str) -> str:
 
 
 def sanitize_filename(filename: str) -> str:
-    """Normaliza e sanitiza nomes de arquivos removendo acentos, espaços e caracteres inválidos."""
+    """Normaliza e sanitiza nomes de arquivos removendo espaços e caracteres inválidos."""
     filename = remove_accents(filename)
     filename = re.sub(r"[^\w\s-]", "", filename)  # Remove caracteres especiais
     filename = re.sub(r"[\s]+", "_", filename)  # Substitui espaços por underlines
     return filename.strip()
 
 
+def clear_terminal() -> None:
+    if get_os_package_manager()[0] == "windows":
+        subprocess.run(["cls"], shell=True)
+    else:
+        subprocess.run(["clear"], shell=True)
+
+
 def make_download_folder(folder: str) -> None:
     """Verifica se existe a pasta de downloads onde são organizadas as playlists baixadas, se não existir, a pasta é criada."""
     print("Verificando se pasta de downloads existe ...")
-    sleep(1)
     if not os.path.exists(folder):
         print("Pasta de download não definida!\nCriando ...")
-        sleep(1)
         os.makedirs(folder)
         print(f"Pasta de download {folder} criada ✅")
     else:
         print("Pasta de download definida! ✅")
 
 
-def main() -> None:
-    make_download_folder("downloads")
+def get_os_package_manager() -> tuple:
+    """Verifica o sistema operacional do usuário. Retornando o gerenciados de pacotes necessário para cada."""
+    if sys.platform in ["win32", "win64"]:
+        return "windows", "winget"
+    elif sys.platform in ["linux"]:
+        return "linux", "apt"
+
+
+def execute_ffmpeg_installation() -> None:
+    """Identifica e instala o FFmpeg no SO (windows ou linux)"""
+    current_os_pm = get_os_package_manager()
+    print(f"SO: {current_os_pm[0].capitalize()}")
+    print(f"Instalar o FFmpeg?\n[Y]: sim, [n]: não.", end=" ")
+    opc = input(": ")
+
+    """
+    (windows)
+        winget install ffmpeg
+        scoop install ffmpeg
+    (linux)
+        sudo apt install ffmpeg
+    """
+
+    if opc in "Yy" or opc == "":
+        print(f"Tentando instalar FFmpeg via {current_os_pm[1]} do {current_os_pm[0]}")
+        try:
+            if current_os_pm[0] == "windows":
+                subprocess.run(["winget", "install", "ffmpeg"], shell=True)
+            else:
+                subprocess.run(["sudo apt install ffmpeg"], shell=True)
+        except:
+            print("Não foi possível concluir a instalação.")
+            exit(1)
+    else:
+        print("Encerrando.")
+        exit(1)
+
+
+def verify_ffmpeg_installation():
+    """Verifica se o FFmpeg está instalado no PC (windows)"""
+
+    # verificar se o FFmpeg está instalado
+    print("Verificando instalação do FFmpeg ...")
+    try:
+        subprocess.run(["ffmpeg"])
+    except Exception as e:
+        print(f"FFmpeg não encontrado.\n{e}")
+        print("Continuando para instalação ...")
+        execute_ffmpeg_installation()
+    else:
+        print("FFmpeg encontrado\nContinuando ...")
+
+    # criar um settings pra guardar essas informações (depois).
+
+
+def playlist_downloader(link: str) -> None:
+    if link.strip() == "":
+        print("Nenhum link fornecido, encerrando.")
+        return
 
     download_dir = "downloads"
-    link = input("URL da Playlist do YouTube ✨: ")
 
     ydl_opts = {
         "format": "bestvideo+bestaudio/best",
@@ -85,6 +147,14 @@ def main() -> None:
                     print(f"❌ Erro ao baixar {video['title']}: {e}")
 
     print("🎉 Todos os vídeos baixados e renomeados com sucesso! 🎉")
+
+
+def main() -> None:
+    make_download_folder("downloads")
+    verify_ffmpeg_installation()
+    clear_terminal()
+    print("Youtube Playlist Downloader")
+    playlist_downloader(link=input("URL da Playlist do YouTube ✨: "))
 
 
 if __name__ == "__main__":
