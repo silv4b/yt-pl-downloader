@@ -28,20 +28,29 @@ jobs:
 
       - name: Build Executable
         run: |
-          pyinstaller --onefile playlist_downloader.py
-          # Ajusta o nome do executável para Linux
+          pyinstaller --onefile --name playlist-downloader playlist_downloader.py
+          # Verifica se o arquivo foi gerado
           if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            mv dist/playlist_downloader dist/playlist-downloader-linux
+            ls -la dist/
+            mv dist/playlist-downloader dist/playlist-downloader-linux
+          else
+            ls -la dist/
+            mv dist/playlist-downloader.exe dist/playlist-downloader-windows.exe
           fi
-          # O Windows já gera com .exe automaticamente
+
+      - name: Verify files exist
+        run: |
+          echo "Generated files:"
+          ls -la dist/
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
             dist/playlist-downloader-linux
-            dist/playlist_downloader.exe
+            dist/playlist-downloader-windows.exe
           tag_name: ${{ github.ref }}
           draft: false
+          replace: true  # Sobrescreve a release se já existir
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_REPO_ACTION }}
