@@ -1,0 +1,33 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Dispara quando uma tag no formato "v1.0.0" é criada
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Ou outro OS compatível
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python (exemplo para PyInstaller)
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: pip install pyinstaller
+
+      - name: Build Executable
+        run: pyinstaller --onefile playlist_downloader.py  # Substitua pelo seu comando de build
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*  # Caminho para o executável gerado
+          draft: false   # Publica a release imediatamente (true para rascunho)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Token automático do GitHub
