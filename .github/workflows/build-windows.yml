@@ -27,7 +27,7 @@ jobs:
 
       - name: Build Windows Executable
         run: |
-          pyinstaller --onefile --name playlist-downloader playlist_downloader.py
+          pyinstaller --onefile --name playlist-downloader.exe playlist_downloader.py
           mkdir release_assets
           move dist\playlist-downloader.exe release_assets\playlist-downloader-windows.exe
 
