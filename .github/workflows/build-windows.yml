@@ -23,11 +23,19 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyinstaller youtube-dl ffmpeg-python
+          pip install -r requirements.txt
+          pip install pyinstaller
 
       - name: Build Windows Executable
         run: |
-          pyinstaller --onefile --name playlist-downloader playlist_downloader.py
+          pyinstaller --onefile --name playlist-downloader ^
+            --hidden-import='yt_dlp' ^
+            --hidden-import='ffmpeg' ^
+            --collect-all yt_dlp ^
+            --collect-all ffmpeg ^
+            --add-data ".;." ^
+            playlist_downloader.py
+          
           mkdir release_assets
           move dist\playlist-downloader.exe release_assets\playlist-downloader-windows.exe
           dir release_assets
@@ -36,7 +44,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-          files: release_assets/playlist-downloader-windows.exe  # Usando barra normal
+          files: release_assets/playlist-downloader-windows.exe
           draft: false
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_REPO_ACTION }}
