@@ -32,12 +32,12 @@ jobs:
       # Passo 4: Gerar o executável
       - name: Build Executable
         run: |
-          pyinstaller --onefile src/main.py  # Altere para seu script principal
+          pyinstaller --onefile src/playlist_downloader.py
           # Renomeia o executável conforme o OS
           if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            mv dist/main dist/app-linux
+            mv dist/playlist_downloader dist/playlist_downloader
           elif [ "${{ matrix.os }}" == "windows-latest" ]; then
-            mv dist/main.exe dist/app-windows.exe
+            mv dist/playlist_downloader.exe dist/playlist_downloader.exe
           fi
 
       # Passo 5: Enviar executáveis para a Release do GitHub
