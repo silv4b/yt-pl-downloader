@@ -1,14 +1,15 @@
 # YouTube Playlist Downloader
 
 Este repositório contém um projeto em Python para baixar todos os vídeos de uma playlist
- do YouTube. O projeto agora inclui apenas a Interface de Linha de Comando (CLI).
+ do YouTube. O projeto agora inclui apenas a Interface de Linha de Comando (CLI) e funciona tanto no windows, quanto no linux.
 
 ## Recursos
 
 - **Downloads de Playlist:** Baixa todos os vídeos de uma URL de playlist do YouTube.
 - **Nomeação de Pastas:** Converte o título da playlist em um nome de pasta alfanumérico para armazenar os vídeos baixados.
 - **Alta Resolução:** Baixa cada vídeo na mais alta resolução disponível.
-- **Atualizações em Tempo Real:** A GUI fornece progresso do download e relatórios de erro em tempo real.
+- **Atualizações em Tempo Real:** A CLI fornece progresso do download e relatórios de erro em tempo real.
+- **GUI:** [Em desenvolvimento]
 
 ## Instalação
 
@@ -64,6 +65,8 @@ Este repositório contém um projeto em Python para baixar todos os vídeos de u
     ```
 
 ## Build
+
+> No momento, apenas para windows.
 
 Para usar o script como um executável, basta executar o comando a seguir:
 
