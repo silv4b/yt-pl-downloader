@@ -41,10 +41,17 @@ jobs:
           pyinstaller --onefile --name playlist-downloader playlist_downloader.py
           move dist\playlist-downloader.exe dist\playlist-downloader-windows.exe
 
-      - name: Verify files
+      - name: Verify files (Linux)
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          echo "Generated files:"
-          ls -la dist/ || dir dist/
+          echo "Generated files (Linux):"
+          ls -la dist/
+
+      - name: Verify files (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo "Generated files (Windows):"
+          dir dist/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
