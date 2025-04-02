@@ -1,33 +1,51 @@
-name: Build and Release
+name: Build Windows and Linux
 
 on:
   push:
     tags:
-      - 'v*'  # Dispara quando uma tag no formato "v1.0.0" é criada
+      - 'v*'  # Dispara quando tags como v1.0.0 são criadas
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Ou outro OS compatível
+    runs-on: ${{ matrix.os }}  # Matriz de sistemas operacionais
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]  # Linux e Windows
+    permissions:
+      contents: write  # Permite criar releases
 
     steps:
-      - name: Checkout Code
+      # Passo 1: Baixar o código do repositório
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python (exemplo para PyInstaller)
+      # Passo 2: Configurar Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Install Dependencies
+      # Passo 3: Instalar dependências (PyInstaller)
+      - name: Install PyInstaller
         run: pip install pyinstaller
 
+      # Passo 4: Gerar o executável
       - name: Build Executable
-        run: pyinstaller --onefile playlist_downloader.py  # Substitua pelo seu comando de build
+        run: |
+          pyinstaller --onefile src/main.py  # Altere para seu script principal
+          # Renomeia o executável conforme o OS
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            mv dist/main dist/app-linux
+          elif [ "${{ matrix.os }}" == "windows-latest" ]; then
+            mv dist/main.exe dist/app-windows.exe
+          fi
 
+      # Passo 5: Enviar executáveis para a Release do GitHub
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/*  # Caminho para o executável gerado
-          draft: false   # Publica a release imediatamente (true para rascunho)
+          files: |
+            dist/app-linux
+            dist/app-windows.exe
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_REPO_ACTION }}  # Token automático do GitHub
