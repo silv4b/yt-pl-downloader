@@ -23,34 +23,61 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
+      - name: Install dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
         run: pip install pyinstaller youtube-dl ffmpeg-python
+
+      - name: Install dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller youtube-dl ffmpeg-python
 
       - name: Build Executable
         run: |
           pyinstaller --onefile --name playlist-downloader playlist_downloader.py
-          # Verifica se o arquivo foi gerado
           if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            ls -la dist/
             mv dist/playlist-downloader dist/playlist-downloader-linux
           else
-            ls -la dist/
             mv dist/playlist-downloader.exe dist/playlist-downloader-windows.exe
           fi
 
-      - name: Verify files exist
+      - name: Verify files
         run: |
           echo "Generated files:"
           ls -la dist/
 
-      - name: Upload to Release
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: executables-${{ matrix.os }}
+          path: dist/
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ./artifacts
+
+      - name: List downloaded files
+        run: |
+          echo "Artifacts downloaded:"
+          find ./artifacts -type f
+
+      - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ github.ref_name }}
           files: |
-            dist/playlist-downloader-linux
-            dist/playlist-downloader-windows.exe
-          tag_name: ${{ github.ref }}
+            artifacts/executables-ubuntu-latest/playlist-downloader-linux
+            artifacts/executables-windows-latest/playlist-downloader-windows.exe
           draft: false
-          replace: true  # Sobrescreve a release se já existir
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_REPO_ACTION }}
