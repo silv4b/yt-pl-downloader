@@ -93,6 +93,38 @@ def verify_ffmpeg_installation():
     # criar um settings pra guardar essas informações (depois).
 
 
+def choose_between_video_or_audio() -> dict:
+    print("Deseja baixar vídeos (.mp4) ou áudios (.mp3)")
+    print("[V] Vídeo (default), [A]: Áudio", end=" ")
+    format = input("Opção: ")
+
+    if format.lower().strip() == "v":
+        print("Extraindo vídeos da playlist.")
+        return {
+            "format": "bestvideo+bestaudio/best",
+            "merge_output_format": "mp4",
+            "noplaylist": False,
+            "quiet": False,
+            "postprocessors": [
+                {"key": "FFmpegVideoConvertor", "preferedformat": "mp4"}
+            ],
+        }, "video"
+    elif format.lower().strip() == "a":
+        print("Extraindo áudios da playlist.")
+        return {
+            "format": "bestaudio/best",
+            "merge_output_format": "mp3",
+            "noplaylist": False,
+            "quiet": False,
+            "postprocessors": [
+                {"key": "FFmpegVideoConvertor", "preferedformat": "mp3"}
+            ],
+        }, "audio"
+    else:
+        print("Erro ... 🪲")
+        exit(1)
+
+
 def playlist_downloader(link: str) -> None:
     if link.strip() == "":
         print("Nenhum link fornecido, encerrando.")
@@ -100,13 +132,7 @@ def playlist_downloader(link: str) -> None:
 
     download_dir = "downloads"
 
-    ydl_opts = {
-        "format": "bestvideo+bestaudio/best",
-        "merge_output_format": "mp4",
-        "noplaylist": False,
-        "quiet": False,
-        "postprocessors": [{"key": "FFmpegVideoConvertor", "preferedformat": "mp4"}],
-    }
+    ydl_opts = choose_between_video_or_audio()[0]
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
@@ -146,7 +172,7 @@ def playlist_downloader(link: str) -> None:
                 except Exception as e:
                     print(f"❌ Erro ao baixar {video['title']}: {e}")
 
-    print("🎉 Todos os vídeos baixados e renomeados com sucesso! 🎉")
+    print("🎉 Todos os arquivos foram baixados e renomeados com sucesso! 🎉")
 
 
 def main() -> None:
