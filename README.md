@@ -9,6 +9,7 @@ Este repositório contém um projeto em Python para baixar todos os vídeos de u
 - **Nomeação de Pastas:** Converte o título da playlist em um nome de pasta alfanumérico para armazenar os vídeos baixados.
 - **Alta Resolução:** Baixa cada vídeo na mais alta resolução disponível.
 - **Atualizações em Tempo Real:** A CLI fornece progresso do download e relatórios de erro em tempo real.
+- **Escolher Formato:** Escolhe se quer baixar a playlist em arquivos de vídeo (.mp4) ou áudios (.mp3).
 - **GUI:** [Em desenvolvimento]
 
 ## Instalação
@@ -25,6 +26,8 @@ Este repositório contém um projeto em Python para baixar todos os vídeos de u
         ```bash
         sudo apt install ffmpeg
         ```
+
+    > O script irá verificar se o FFmpeg está instalado, solicitando ao usuário permissão para instalar, quando necessário.
 
 2. Clone o repositório:
 
@@ -66,12 +69,14 @@ Este repositório contém um projeto em Python para baixar todos os vídeos de u
 
 ## Build
 
+### Para Windows
+
 > No momento, apenas para windows.
 
 Para usar o script como um executável, basta executar o comando a seguir:
 
 ```bash
-pyinstaller --onefile playlist_downloader.py
+pyinstaller --onefile --name playlist-downloader playlist_downloader.py
 ```
 
 Serão criadas duas pastas, `build` e `dist`, dentro da segunda pasta estará o executável, podendo ser usado em qualquer pasta em que seja mantido.
