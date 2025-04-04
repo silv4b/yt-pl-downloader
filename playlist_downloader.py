@@ -21,13 +21,14 @@ def sanitize_filename(filename: str) -> str:
 
 
 def clear_terminal() -> None:
+    """Limpa o terminal da aplicação."""
     if get_os_package_manager()[0] == "windows":
         subprocess.run(["cls"], shell=True)
     else:
         subprocess.run(["clear"], shell=True)
 
 
-def make_download_folder(folder: str) -> None:
+def verify_download_folder(folder: str) -> None:
     """Verifica se existe a pasta de downloads onde são organizadas as playlists baixadas, se não existir, a pasta é criada."""
     print("Verificando se pasta de downloads existe ...")
     if not os.path.exists(folder):
@@ -53,19 +54,13 @@ def execute_ffmpeg_installation() -> None:
     print(f"Instalar o FFmpeg?\n[Y]: sim, [n]: não.", end=" ")
     opc = input(": ")
 
-    """
-    (windows)
-        winget install ffmpeg
-        scoop install ffmpeg
-    (linux)
-        sudo apt install ffmpeg
-    """
-
     if opc in "Yy" or opc == "":
         print(f"Tentando instalar FFmpeg via {current_os_pm[1]} do {current_os_pm[0]}")
         try:
             if current_os_pm[0] == "windows":
-                subprocess.run(["winget", "install", "ffmpeg"], shell=True)
+                subprocess.run(
+                    ["winget", "install", "ffmpeg"], shell=True
+                )  # or scoop install ffmpeg
             else:
                 subprocess.run(["sudo apt install ffmpeg"], shell=True)
         except:
@@ -76,7 +71,7 @@ def execute_ffmpeg_installation() -> None:
         exit(1)
 
 
-def verify_ffmpeg_installation():
+def verify_ffmpeg_installation() -> None:
     """Verifica se o FFmpeg está instalado no PC (windows)"""
 
     # verificar se o FFmpeg está instalado
@@ -94,9 +89,10 @@ def verify_ffmpeg_installation():
 
 
 def choose_between_video_or_audio() -> dict:
+    """Retorna as diretrizes que o usuário escolher para serem usadas pelo YoutubeDL ao baixar os aquivos da playlist."""
     print("Deseja baixar vídeos (.mp4) ou áudios (.mp3)")
-    print("[V] Vídeo (default), [A]: Áudio", end=" ")
-    format = input("Opção: ")
+    print("[V] Vídeo (default), [A]: Áudio.", end=" ")
+    format = input(": ")
 
     if format.lower().strip() == "v":
         print("Extraindo vídeos da playlist.")
@@ -126,15 +122,18 @@ def choose_between_video_or_audio() -> dict:
 
 
 def playlist_downloader(link: str) -> None:
+    """Responsável por efetivar o download dos aquivos da playlist usando o YoutubeDL."""
     if link.strip() == "":
         print("Nenhum link fornecido, encerrando.")
-        return
+        exit(1)
 
     download_dir = "downloads"
 
-    ydl_opts = choose_between_video_or_audio()[0]
+    ydl_options = choose_between_video_or_audio()
+    ydl_parameters = ydl_options[0]  # parâmetros do ydl
+    ydl_format = ydl_options[1]  # formato preferido pelo usuário (audio|video)
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+    with yt_dlp.YoutubeDL(ydl_parameters) as ydl:
         try:
             playlist_info = ydl.extract_info(link, download=False)
         except Exception as e:
@@ -142,7 +141,7 @@ def playlist_downloader(link: str) -> None:
             exit(1)
 
         playlist_title = sanitize_filename(playlist_info["title"])
-        playlist_path = os.path.join(download_dir, playlist_title)
+        playlist_path = os.path.join(download_dir, playlist_title, ydl_format)
 
         os.makedirs(playlist_path, exist_ok=True)
 
@@ -156,9 +155,9 @@ def playlist_downloader(link: str) -> None:
             temp_filename = f"{index:02d}_{sanitized_title}.mp4"
             temp_filepath = os.path.join(playlist_path, temp_filename)
 
-            ydl_opts["outtmpl"] = temp_filepath
+            ydl_parameters["outtmpl"] = temp_filepath
 
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl2:
+            with yt_dlp.YoutubeDL(ydl_parameters) as ydl2:
                 try:
                     print(f"\nBaixando ({index}/{total_video_count}): {video['title']}")
                     ydl2.download([video["webpage_url"]])
@@ -176,11 +175,13 @@ def playlist_downloader(link: str) -> None:
 
 
 def main() -> None:
-    make_download_folder("downloads")
+    verify_download_folder("downloads")
     verify_ffmpeg_installation()
-    clear_terminal()
-    print("Youtube Playlist Downloader")
-    playlist_downloader(link=input("URL da Playlist do YouTube ✨: "))
+
+    while True:
+        clear_terminal()
+        print("Youtube Playlist Downloader [Enter para sair]")
+        playlist_downloader(link=input("URL da Playlist do YouTube ✨: "))
 
 
 if __name__ == "__main__":
