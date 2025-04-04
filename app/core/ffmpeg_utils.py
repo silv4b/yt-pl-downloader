@@ -21,8 +21,6 @@ def install_ffmpeg() -> None:
     if sys.platform in ["win32", "win64"]:
         subprocess.run(["winget", "install", "ffmpeg"], check=True, shell=True)
     elif sys.platform in "linux":
-        subprocess.run(
-            ["sudo", "apt", "install", "-y", "ffmpeg"], check=True, shell=True
-        )
+        subprocess.run(["sudo apt install -y ffmpeg"], check=True, shell=True)
     else:
         raise OSError("Sistema operacional não suportado")
