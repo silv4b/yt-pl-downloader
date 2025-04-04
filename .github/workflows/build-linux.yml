@@ -34,8 +34,8 @@ jobs:
             --collect-all yt_dlp \
             --collect-all ffmpeg \
             --add-data ".:." \
-            playlist_downloader.py
-          
+            main.py
+
           mkdir -p release_assets
           mv dist/playlist-downloader release_assets/playlist-downloader-linux
           chmod +x release_assets/playlist-downloader-linux
