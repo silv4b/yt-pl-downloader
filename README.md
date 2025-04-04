@@ -12,7 +12,7 @@ Este repositório contém um projeto em Python para baixar todos os vídeos de u
 - **Escolher Formato:** Escolhe se quer baixar a playlist em arquivos de vídeo (.mp4) ou áudios (.mp3).
 - **GUI:** [Em desenvolvimento]
 
-## Instalação
+## **Instalação**
 
 1. Instale o ffmpeg no seu sistema operacional
    - No Windows:
@@ -69,9 +69,9 @@ Este repositório contém um projeto em Python para baixar todos os vídeos de u
 
 ## Build
 
-### Para Windows
+### Para Windows e Linux
 
-> No momento, apenas para windows.
+> O build pode ser feito via terminal, usando o pyinstaller, presente no `requirements.txt`.
 
 Para usar o script como um executável, basta executar o comando a seguir:
 
@@ -79,7 +79,7 @@ Para usar o script como um executável, basta executar o comando a seguir:
 pyinstaller --onefile --name playlist-downloader playlist_downloader.py
 ```
 
-Serão criadas duas pastas, `build` e `dist`, dentro da segunda pasta estará o executável, podendo ser usado em qualquer pasta em que seja mantido.
+No Windows ou no Linux, serão criadas duas pastas, `build` e `dist`, dentro da segunda pasta estará o executável, podendo ser usado em qualquer pasta em que seja mantido. Porém no linux será necessário dar a permissão para execução. Com: `chmod u+x playlist-downloader`.
 
 ## Uso
 
