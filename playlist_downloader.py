@@ -141,7 +141,9 @@ def playlist_downloader(link: str) -> None:
             exit(1)
 
         playlist_title = sanitize_filename(playlist_info["title"])
-        playlist_path = os.path.join(download_dir, playlist_title, ydl_format)
+        playlist_path = os.path.join(
+            download_dir, "downloaded_playlists", playlist_title, ydl_format
+        )
 
         os.makedirs(playlist_path, exist_ok=True)
 
