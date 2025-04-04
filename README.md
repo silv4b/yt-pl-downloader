@@ -6,10 +6,12 @@ Este repositório contém um projeto em Python para baixar todos os vídeos de u
 ## Recursos
 
 - **Downloads de Playlist:** Baixa todos os vídeos de uma URL de playlist do YouTube.
-- **Nomeação de Pastas:** Converte o título da playlist em um nome de pasta alfanumérico para armazenar os vídeos baixados.
-- **Alta Resolução:** Baixa cada vídeo na mais alta resolução disponível.
+- **Downloads de Videos:** Baixa vídeos únicos de uma URL de vídeos do YouTube.
+- **Nomeação de Pastas:** Converte o título da playlist em um nome de pasta alfanumérico para armazenar os vídeos e áudios baixados.
+- **Alta Resolução:** Baixa cada vídeo/áudio na mais alta resolução disponível.
 - **Atualizações em Tempo Real:** A CLI fornece progresso do download e relatórios de erro em tempo real.
-- **Escolher Formato:** Escolhe se quer baixar a playlist em arquivos de vídeo (.mp4) ou áudios (.mp3).
+- **Escolher Formato:** Escolhe se quer baixar a playlist ou vídeos em arquivos de vídeo (.mp4) ou áudios (.mp3).
+- **Organização em Pastas:** Todos os downloads são organizados em pastas específicas `downloads\downloaded_playlists` e `downloads\downloaded_videos_only`.
 - **GUI:** [Em desenvolvimento]
 
 ## **Instalação**
@@ -65,6 +67,12 @@ Este repositório contém um projeto em Python para baixar todos os vídeos de u
 
     ```bash
     pip install -r requirements.txt
+    ```
+
+6. Executar o Script via terminal:
+
+    ```bash
+    python main.py
     ```
 
 ## Build
