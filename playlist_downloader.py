@@ -176,15 +176,9 @@ def playlist_downloader(link: str) -> None:
     print("🎉 Todos os arquivos foram baixados e renomeados com sucesso! 🎉")
 
 
-def main() -> None:
+def download_playlist() -> None:
     verify_download_folder("downloads")
     verify_ffmpeg_installation()
-
-    while True:
-        clear_terminal()
-        print("Youtube Playlist Downloader [Enter para sair]")
-        playlist_downloader(link=input("URL da Playlist do YouTube ✨: "))
-
-
-if __name__ == "__main__":
-    main()
+    clear_terminal()
+    print("Youtube Playlist Downloader [Enter para sair]")
+    playlist_downloader(link=input("URL da Playlist do YouTube ✨: "))
