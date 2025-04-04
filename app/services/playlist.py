@@ -1,7 +1,7 @@
 import os
 import subprocess
 import yt_dlp
-from core.utils import sanitize_filename
+from app.core.utils import sanitize_filename
 
 
 def choose_between_video_or_audio() -> dict:
