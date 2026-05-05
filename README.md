@@ -1,120 +1,193 @@
-# YouTube Playlist Downloader
+# YouTube Downloader
 
-Este repositório contém um projeto em Python para baixar todos os vídeos de uma playlist
- do YouTube. O projeto agora inclui apenas a Interface de Linha de Comando (CLI) e funciona tanto no windows, quanto no linux.
+CLI para baixar vídeos individuais e playlists do YouTube em formato de vídeo (MP4) ou áudio (MP3).
 
 ## Recursos
 
-- **Downloads de Playlist:** Baixa todos os vídeos de uma URL de playlist do YouTube.
-- **Downloads de Videos:** Baixa vídeos únicos de uma URL de vídeos do YouTube.
-- **Nomeação de Pastas:** Converte o título da playlist em um nome de pasta alfanumérico para armazenar os vídeos e áudios baixados.
-- **Alta Resolução:** Baixa cada vídeo/áudio na mais alta resolução disponível.
-- **Atualizações em Tempo Real:** A CLI fornece progresso do download e relatórios de erro em tempo real.
-- **Escolher Formato:** Escolhe se quer baixar a playlist ou vídeos em arquivos de vídeo (.mp4) ou áudios (.mp3).
-- **Organização em Pastas:** Todos os downloads são organizados em pastas específicas `downloads\downloaded_playlists` e `downloads\downloaded_videos_only`.
-- **GUI:** [Em desenvolvimento]
+- **Download de vídeos individuais** — Baixa qualquer vídeo do YouTube
+- **Download de playlists completas** — Baixa todos os vídeos de uma playlist
+- **Escolha de formato** — Vídeo (MP4) ou áudio (MP3)
+- **Organização automática** — Downloads organizados em pastas por título
+- **FFmpeg integrado** — Verificação e instalação automática do FFmpeg
+- **Interface interativa (TUI)** — Navegue com setas ↑↓ e Enter (via `inquirer`)
+- **Logging em tempo real** — Progresso e erros visíveis no terminal
+- **Multiplataforma** — Funciona em Windows e Linux
 
-## **Instalação**
+## Requisitos
 
-1. Instale o ffmpeg no seu sistema operacional
-   - No Windows:
+- **Python 3.12+**
+- **uv** — Gerenciador de pacotes moderno
+- **FFmpeg** — Instalado automaticamente pelo script se necessário
 
-        ```bash
-        scoop install ffmpeg
-        ```
+### Instalando o uv
 
-   - No Linux (Ubuntu):
+```bash
+# Windows (via winget)
+winget install --id=astral-sh.uv
 
-        ```bash
-        sudo apt install ffmpeg
-        ```
+# Linux/macOS
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
-    > O script irá verificar se o FFmpeg está instalado, solicitando ao usuário permissão para instalar, quando necessário.
+## Instalação
 
-2. Clone o repositório:
+1. Clone o repositório:
 
     ```bash
     git clone https://github.com/silv4b/yt-pl-downloader.git
-    ```
-
-3. Acesse o diretório do projeto:
-
-    ```bash
     cd yt-pl-downloader
     ```
 
-4. Configure um ambiente **virtual** (recomendado):
+2. Instale as dependências:
 
     ```bash
-    python -m venv venv
+    uv sync
     ```
-
-    e ative o ambiente virtual
-
-    - No Windows:
-
-        ```bash
-        .\venv\Scripts\Activate.ps1
-        ```
-
-    - No Linux:
-
-        ```bash
-        source venv/bin/activate
-        ```
-
-5. Instale as dependências necessárias:
-
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-6. Executar o Script via terminal:
-
-    ```bash
-    python main.py
-    ```
-
-## Build
-
-### Para Windows e Linux
-
-> O build pode ser feito via terminal, usando o pyinstaller, presente no `requirements.txt`.
-
-Para usar o script como um executável, basta executar o comando a seguir:
-
-```bash
-pyinstaller --onefile --name playlist-downloader playlist_downloader.py
-```
-
-No Windows ou no Linux, serão criadas duas pastas, `build` e `dist`, dentro da segunda pasta estará o executável, podendo ser usado em qualquer pasta em que seja mantido. Porém no linux será necessário dar a permissão para execução. Com: `chmod u+x playlist-downloader`.
 
 ## Uso
 
-### Interface de Linha de Comando (CLI)
+### Executando o projeto
 
-1. Execute o script CLI:
+```bash
+uv run python main.py
+```
 
-    ```bash
-    python playlist_downloader.py
-    ```
+### Interface interativa (TUI)
 
-2. Siga as instruções:
+O projeto usa **inquirer** para uma experiência de terminal interativa. Use as **setas ↑↓** para navegar e **Enter** para confirmar.
 
-   - Insira a URL da playlist do YouTube quando solicitado.
-   - O script criará uma pasta (nomeada com o título da playlist sanitizado) dentro de uma outra pasta chamada `downloads` e baixará todos os vídeos nela.
-   - Atualizações de progresso e detalhes do tamanho dos vídeos são exibidos no terminal.
+```
+========================================
+  YouTube Downloader
+========================================
 
-## Notas Adicionais
+? O que deseja fazer?: (Use ↑↓ e Enter)
+    Baixar vídeo individual
+    Baixar playlist completa
+  > Sair
+```
 
-- O projeto agora utiliza `yt_dlp` para melhor compatibilidade e desempenho em comparação com a biblioteca `pytube`.
+### Baixando um vídeo individual
 
-- Para compilações multiplataforma, lembre-se de que os executáveis são específicos para cada sistema operacional. Atualmente, apenas o executável para Ubuntu é fornecido (compilado com PyInstaller no Ubuntu).
+1. Selecione **"Baixar vídeo individual"** e pressione `Enter`
+2. Cole a URL do vídeo e pressione `Enter`
+3. Selecione **Vídeo (MP4)** ou **Áudio (MP3)** com as setas
+4. O download será salvo em `downloads/downloaded_videos/<titulo>/<video|audio>/`
 
-- Para o funcionamento correto, o FFMPEG deve estar instalado.
+### Baixando uma playlist
 
-## Fontes
+1. Selecione **"Baixar playlist completa"** e pressione `Enter`
+2. Cole a URL da playlist e pressione `Enter`
+3. Selecione **Vídeo (MP4)** ou **Áudio (MP3)** com as setas
+4. Os downloads serão salvos em `downloads/downloaded_playlists/<titulo>/<video|audio>/`
 
-[Documentação do yt_dlp](https://github.com/yt-dlp/yt-dlp)
+## Estrutura do Projeto
 
-> Projeto baseado no design de [Dhananjay Porwal](https://github.com/DhananjayPorwal/youtube-playlist-downloader).
+```text
+yt-pl-downloader/
+├── main.py                        # Entry point
+├── pyproject.toml                 # Configuração do projeto
+├── config.yaml                    # Configurações de paths e defaults
+│
+├── app/
+│   ├── cli/                       # Interface de linha de comando
+│   │   └── menu.py                # Prompts e output de UI
+│   │
+│   ├── core/                      # Infraestrutura
+│   │   ├── config.py              # DownloadConfig centralizado
+│   │   ├── ffmpeg_utils.py        # Verificação e instalação do FFmpeg
+│   │   ├── logger.py              # Logging estruturado
+│   │   └── utils.py               # Utilitários (sanitize, etc)
+│   │
+│   ├── models/                    # Modelos de dados
+│   │   ├── video.py               # VideoInfo
+│   │   └── playlist.py            # PlaylistInfo
+│   │
+│   ├── services/                  # Lógica de download
+│   │   ├── downloader.py          # Classe base abstrata
+│   │   ├── video_downloader.py    # Download de vídeo único
+│   │   └── playlist_downloader.py # Download de playlist
+│   │
+│   └── exceptions.py              # Exceções customizadas
+│
+└── tests/                         # Testes com pytest
+    ├── test_core/
+    │   ├── test_config.py
+    │   └── test_utils.py
+    └── test_models/
+        └── test_models.py
+```
+
+## Comandos úteis
+
+```bash
+# Instalar dependências
+uv sync
+
+# Executar o projeto
+uv run python main.py
+
+# Rodar testes
+uv run pytest
+
+# Rodar testes com verbose
+uv run pytest tests/ -v
+
+# Executar linter
+uv run ruff check .
+
+# Formatar código
+uv run ruff format .
+
+# Adicionar nova dependência
+uv add <pacote>
+
+# Adicionar dependência de desenvolvimento
+uv add --dev <pacote>
+```
+
+## Build (Executável)
+
+### Usando PyInstaller
+
+```bash
+# Instalar PyInstaller (já incluído nas dev dependencies)
+uv sync
+
+# Build
+uv run pyinstaller --onefile --name yt-pl-downloader main.py
+```
+
+O executável será criado na pasta `dist/`.
+
+### No Linux
+
+```bash
+# Dar permissão de execução
+chmod +x dist/yt-pl-downloader
+```
+
+## CI/CD
+
+O projeto possui GitHub Actions para build automático em Windows e Linux. Ao criar uma tag com o formato `v*`, o build é disparado automaticamente:
+
+```bash
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+## Notas
+
+- O FFmpeg é necessário para conversão de formatos. O projeto verifica e oferece instalação automática
+- Os downloads são organizados automaticamente em `downloads/`
+- Títulos de vídeos e playlists são sanitizados para nomes de pasta válidos
+- Em playlists, vídeos falhos são pulados e o download continua
+
+## Licença
+
+MIT
+
+## Créditos
+
+- Baseado em [yt-dlp](https://github.com/yt-dlp/yt-dlp)
+- Design inspirado em [Dhananjay Porwal](https://github.com/DhananjayPorwal/youtube-playlist-downloader)

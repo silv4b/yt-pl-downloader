@@ -1,0 +1,6 @@
+downloads_dir: "downloads"
+video_subdir: "downloaded_videos"
+playlist_subdir: "downloaded_playlists"
+default_video_format: "mp4"
+default_audio_format: "mp3"
+audio_quality: "192"

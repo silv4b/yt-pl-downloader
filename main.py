@@ -1,62 +1,94 @@
-from app.services.playlist import playlist_downloader
-from app.services.video import video_downloader
+from __future__ import annotations
+
+from app.cli.menu import (
+    print_error,
+    print_header,
+    print_info,
+    print_success,
+    prompt_ffmpeg_install,
+    prompt_format,
+    prompt_main_action,
+    prompt_url,
+)
+from app.core.config import config
+from app.core.ffmpeg_utils import install_ffmpeg, verify_ffmpeg_installed
 from app.core.utils import clear_terminal
-from app.core.ffmpeg_utils import verify_ffmpeg_installed, install_ffmpeg
-from app.core.utils import clear_terminal
+from app.exceptions import DownloadError, FFmpegInstallError
+from app.services.playlist_downloader import PlaylistDownloader
+from app.services.video_downloader import VideoDownloader
 
 
 def check_and_install_ffmpeg() -> bool:
-    """Verifica e instala o FFmpeg em uma interação com o usuário"""
-    if not verify_ffmpeg_installed():
-        clear_terminal()
-        print("FFmpeg não encontrado (necessário para conversão de formatos)")
-        print("Deseja instalar agora? [Y/N]: ", end="")
-        choice = input().lower()
+    if verify_ffmpeg_installed():
+        return True
 
-        if choice == "y":
-            try:
-                install_ffmpeg()
-                print("FFmpeg instalado com sucesso! ✔️")
-                return True
-            except Exception as e:
-                print(f"Falha na instalação: {e} ❌")
-                return False
-        else:
-            print("Operação cancelada pelo usuário ⚠️")
+    clear_terminal()
+    print("FFmpeg não encontrado (necessário para conversão de formatos)")
+
+    if prompt_ffmpeg_install():
+        try:
+            install_ffmpeg()
+            print_success("FFmpeg instalado com sucesso!")
+            return True
+        except FFmpegInstallError as e:
+            print_error(f"Falha na instalação: {e}")
             return False
-    return True
+    else:
+        print_info("Operação cancelada pelo usuário")
+        return False
 
 
-def choose_between_video_playlist() -> str:
-    """Verifica se o usuário quer baixar vídeo ou playlist"""
-    print("\nDeseja baixar:")
-    print("[V] Vídeo individual")
-    print("[P] Playlist completa")
-    print("[Q] Sair")
-    choice = input("Opção: ").lower().strip()
-    return choice
+def handle_video_download() -> None:
+    url = prompt_url()
+    if not url:
+        print_error("URL vazia. Operação cancelada.")
+        return
+
+    is_audio = prompt_format()
+
+    try:
+        downloader = VideoDownloader(config)
+        video = downloader.download(url, is_audio)
+        output_dir = config.get_video_output_dir(video.title, is_audio)
+        print_success(f"Download concluído! Salvo em: {output_dir}")
+    except DownloadError as e:
+        print_error(f"Falha no download: {e}")
+
+
+def handle_playlist_download() -> None:
+    url = prompt_url()
+    if not url:
+        print_error("URL vazia. Operação cancelada.")
+        return
+
+    is_audio = prompt_format()
+
+    try:
+        downloader = PlaylistDownloader(config)
+        playlist = downloader.download(url, is_audio)
+        output_dir = config.get_playlist_output_dir(playlist.title, is_audio)
+        print_success(f"Playlist concluída! {len(playlist.videos)} vídeos salvos em: {output_dir}")
+    except DownloadError as e:
+        print_error(f"Falha no download: {e}")
 
 
 def main() -> None:
     clear_terminal()
-    print("=== YouTube Downloader ===")
+    print_header("YouTube Downloader")
 
-    # Verificação inicial do FFmpeg
     if not check_and_install_ffmpeg():
-        exit(1)
+        return
 
     while True:
-        choice = choose_between_video_playlist()
+        choice = prompt_main_action()
 
-        if choice == "v":
-            video_downloader()
-        elif choice == "p":
-            playlist_downloader()
-        elif choice == "q":
-            print("Saindo...")
+        if choice == "video":
+            handle_video_download()
+        elif choice == "playlist":
+            handle_playlist_download()
+        elif choice == "quit":
+            print_info("Saindo...")
             break
-        else:
-            print("Opção inválida! Tente novamente.")
 
 
 if __name__ == "__main__":

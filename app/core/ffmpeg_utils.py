@@ -1,28 +1,37 @@
+from __future__ import annotations
+from app.exceptions import FFmpegInstallError
+import platform
+import shutil
 import subprocess
-import sys
 
 
 def verify_ffmpeg_installed() -> bool:
-    """Verifica se o FFmpeg está disponível no sistema"""
-    try:
-        subprocess.run(
-            ["ffmpeg", "-version"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            check=True,
-        )
-        return True
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return False
+    return shutil.which("ffmpeg") is not None
 
 
 def install_ffmpeg() -> None:
-    """Sua lógica original de instalação multi-plataforma"""
-    if sys.platform in ["win32", "win64"]:
-        subprocess.run(["winget", "install", "ffmpeg"], check=True, shell=True)
-    elif sys.platform in "linux":
-        subprocess.run(
-            ["sudo", "apt", "install", "-y", "ffmpeg"], check=True, shell=True
-        )
+    system = platform.system()
+
+    if system == "Windows":
+        cmd = [
+            "winget",
+            "install",
+            "--id",
+            "Gyan.FFmpeg",
+            "-e",
+            "--accept-source-agreements",
+            "--accept-package-agreements",
+        ]
+    elif system == "Linux":
+        cmd = ["sudo", "apt", "install", "-y", "ffmpeg"]
     else:
-        raise OSError("Sistema operacional não suportado")
+        raise FFmpegInstallError(f"Unsupported operating system: {system}")
+
+    try:
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise FFmpegInstallError(f"FFmpeg installation failed: {result.stderr}")
+    except subprocess.CalledProcessError as e:
+        raise FFmpegInstallError(f"FFmpeg installation failed: {e.stderr}") from e
+    except FileNotFoundError as e:
+        raise FFmpegInstallError(f"Package manager not found: {e}") from e
