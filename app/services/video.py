@@ -43,7 +43,7 @@ def video_downloader() -> None:
         file_ext = "mp4"
         file_type = "vídeo"
         ydl_parameters = {
-            "format": "bestvideo+bestaudio/best",
+            "format": "best[ext=mp4]/bestvideo+bestaudio/best",
             "merge_output_format": "mp4",
             "outtmpl": os.path.join(OUTPUT_DIR, f"{safe_title}.%(ext)s"),
             "quiet": False,
@@ -60,13 +60,13 @@ def video_downloader() -> None:
             print(f"\nBaixando {file_type}: {video_title}")
             ydl.download([link])
 
-            print(f"\n✅ Download concluído com sucesso!")
-            print(f"📁 Pasta principal: {BASE_DIR}")
-            print(f"📂 Subpasta: {safe_title}/{'audio' if choice == 'a' else 'video'}")
-            print(f"🎯 Arquivo: {safe_title}.{file_ext}")
+            print(f"\nDownload concluído com sucesso!")
+            print(f"Pasta principal: {BASE_DIR}")
+            print(f"Subpasta: {safe_title}/{'audio' if choice == 'a' else 'video'}")
+            print(f"Arquivo: {safe_title}.{file_ext}")
 
         except Exception as e:
-            print(f"❌ Erro durante o download: {e}")
+            print(f"Erro durante o download: {e}")
             return
 
-    print(f"\nOperação finalizada! 🎉")
+    print(f"\nOperação finalizada!")

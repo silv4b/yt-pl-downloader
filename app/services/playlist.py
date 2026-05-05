@@ -1,5 +1,4 @@
 import os
-import subprocess
 import yt_dlp
 from app.core.utils import sanitize_filename
 
@@ -12,7 +11,7 @@ def choose_between_video_or_audio() -> dict:
     if format.lower().strip() == "v":
         print("Extraindo vídeos da playlist.")
         return {
-            "format": "bestvideo+bestaudio/best",
+            "format": "best[ext=mp4]/bestvideo+bestaudio/best",
             "merge_output_format": "mp4",
             "noplaylist": False,
             "quiet": False,
@@ -28,11 +27,16 @@ def choose_between_video_or_audio() -> dict:
             "noplaylist": False,
             "quiet": False,
             "postprocessors": [
-                {"key": "FFmpegVideoConvertor", "preferedformat": "mp3"}
+                {
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": "mp3",
+                    "preferredquality": "192",
+                }
             ],
+            "extractaudio": True,
         }, "audio"
     else:
-        print("Erro ... 🪲")
+        print("Erro ...")
         exit(1)
 
 
@@ -75,10 +79,10 @@ def download_playlist(link: str) -> None:
                 try:
                     print(f"\nBaixando ({index}/{total_video_count}): {video['title']}")
                     ydl2.download([video["webpage_url"]])
-                    print(f"✅ Baixado: {video['title']} com sucesso!")
-                    print(f"📉 Vídeos restantes: {total_video_count - index}")
+                    print(f"Baixado: {video['title']} com sucesso!")
+                    print(f"Vídeos restantes: {total_video_count - index}")
                 except Exception as e:
-                    print(f"❌ Erro ao baixar {video['title']}: {e}")
+                    print(f"Erro ao baixar {video['title']}: {e}")
 
     print("🎉 Todos os arquivos foram baixados e renomeados com sucesso! 🎉")
 
