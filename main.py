@@ -18,6 +18,7 @@ from app.cli.menu import (
     prompt_format,
     prompt_url,
 )
+from app.cli.quality import prompt_quality
 from app.core.config import config
 from app.core.deno_utils import install_deno, verify_deno_installed
 from app.core.ffmpeg_utils import install_ffmpeg, verify_ffmpeg_installed
@@ -85,7 +86,7 @@ def handle_install_deno() -> None:
 def handle_video_download() -> None:
     """Gerencia o fluxo interativo para download de um único vídeo.
 
-    Solicita URL e formato, executa o download e exibe o caminho
+    Solicita URL, formato e qualidade, executa o download e exibe o caminho
     de saída em caso de sucesso ou mensagem de erro em caso de falha.
     """
     url = prompt_url()
@@ -94,10 +95,14 @@ def handle_video_download() -> None:
         return
 
     is_audio = prompt_format()
+    quality = None
+    if not is_audio:
+        info = VideoDownloader(config)._extract_info(url)
+        quality = prompt_quality(info)
 
     try:
         downloader = VideoDownloader(config)
-        video = downloader.download(url, is_audio)
+        video = downloader.download(url, is_audio, quality)
         output_dir = config.get_video_output_dir(video.title, is_audio)
         print_success(f"Download concluído! Salvo em: {output_dir}")
     except DownloadError as e:
@@ -107,7 +112,7 @@ def handle_video_download() -> None:
 def handle_playlist_download() -> None:
     """Gerencia o fluxo interativo para download de uma playlist.
 
-    Solicita URL e formato, executa o download e exibe o caminho
+    Solicita URL, formato e qualidade, executa o download e exibe o caminho
     de saída e quantidade de vídeos em caso de sucesso ou erro em caso de falha.
     """
     url = prompt_url()
@@ -116,10 +121,14 @@ def handle_playlist_download() -> None:
         return
 
     is_audio = prompt_format()
+    quality = None
+    if not is_audio:
+        info = VideoDownloader(config)._extract_info(url)
+        quality = prompt_quality(info)
 
     try:
         downloader = PlaylistDownloader(config)
-        playlist = downloader.download(url, is_audio)
+        playlist = downloader.download(url, is_audio, quality)
         output_dir = config.get_playlist_output_dir(playlist.title, is_audio)
         print_success(f"Playlist concluída! {len(playlist.videos)} vídeos salvos em: {output_dir}")
     except DownloadError as e:

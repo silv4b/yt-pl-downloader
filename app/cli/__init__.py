@@ -8,11 +8,11 @@ from .menu import (
     print_menu,
     print_success,
     print_warning,
-    prompt_deno_install,
     prompt_ffmpeg_install,
     prompt_format,
     prompt_url,
 )
+from .quality import prompt_quality
 
 __all__ = [
     "console",
@@ -24,8 +24,8 @@ __all__ = [
     "print_menu",
     "print_success",
     "print_warning",
-    "prompt_deno_install",
     "prompt_ffmpeg_install",
     "prompt_format",
+    "prompt_quality",
     "prompt_url",
 ]

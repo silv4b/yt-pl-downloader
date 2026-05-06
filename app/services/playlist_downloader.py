@@ -17,7 +17,7 @@ from app.services.downloader import BaseDownloader
 class PlaylistDownloader(BaseDownloader):
     """Baixa todos os vídeos de uma playlist do YouTube."""
 
-    def download(self, url: str, is_audio: bool = False) -> PlaylistInfo:
+    def download(self, url: str, is_audio: bool = False, quality: str | None = None) -> PlaylistInfo:
         """Baixa uma playlist inteira da URL fornecida.
 
         Extrai metadados da playlist, itera por todos os vídeos e
@@ -32,6 +32,8 @@ class PlaylistDownloader(BaseDownloader):
             url: URL da playlist do YouTube.
             is_audio: Se True, extrai áudio como MP3 para todos os vídeos.
                 Se False, baixa como vídeo MP4.
+            quality: Filtro de formato do yt-dlp para qualidade específica.
+                Se None, usa o melhor formato disponível.
 
         Returns:
             PlaylistInfo com título, URL e lista de vídeos baixados.
@@ -77,7 +79,7 @@ class PlaylistDownloader(BaseDownloader):
                 known_size = video_info.get("filesize") or video_info.get("filesize_approx") or 0
 
                 video = VideoInfo(title=video_title, url=video_url)
-                ydl_opts = self._get_ydl_options(output_dir, is_audio)
+                ydl_opts = self._get_ydl_options(output_dir, is_audio, quality=quality)
                 ydl_opts["outtmpl"] = str(output_dir / f"{index:02d}_{video_title}.%(ext)s")
 
                 def hook(d: dict, vt=video_title, ks=known_size) -> None:
