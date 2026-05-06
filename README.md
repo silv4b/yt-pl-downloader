@@ -9,8 +9,8 @@ CLI para baixar vídeos individuais e playlists do YouTube em formato de vídeo 
 - **Escolha de formato** — Vídeo (MP4) ou áudio (MP3)
 - **Organização automática** — Downloads organizados em pastas por título
 - **FFmpeg integrado** — Verificação e instalação automática do FFmpeg
-- **Interface interativa (TUI)** — Navegue com setas ↑↓ e Enter (via `inquirer`)
-- **Logging em tempo real** — Progresso e erros visíveis no terminal
+- **Interface interativa (TUI)** — Navegue com setas ↑↓ e Enter (`inquirer`), com output visual colorido (`Rich`)
+- **Barras de progresso** — Progresso detalhado com %, velocidade, tamanho e tempo restante
 - **Multiplataforma** — Funciona em Windows e Linux
 
 ## Requisitos
@@ -54,32 +54,40 @@ uv run python main.py
 
 ### Interface interativa (TUI)
 
-O projeto usa **inquirer** para uma experiência de terminal interativa. Use as **setas ↑↓** para navegar e **Enter** para confirmar.
+O projeto combina **inquirer** para navegação com setas e **Rich** para output visual.
 
-```
-========================================
-  YouTube Downloader
-========================================
+```text
+╭──────────────────────────────────────╮
+│          YouTube Downloader          │
+╰──────────────────────────────────────╯
 
 ? O que deseja fazer?: (Use ↑↓ e Enter)
     Baixar vídeo individual
-    Baixar playlist completa
-  > Sair
+  > Baixar playlist completa
+    Sair
+```
+
+Durante o download, uma barra de progresso é exibida:
+
+```text
+⠋ vídeo: Meu Vídeo Legal  ████████░░░░░░░░░░░░░  35%  15.2/43.7MB  5.3MB/s  0:00:05
 ```
 
 ### Baixando um vídeo individual
 
-1. Selecione **"Baixar vídeo individual"** e pressione `Enter`
-2. Cole a URL do vídeo e pressione `Enter`
-3. Selecione **Vídeo (MP4)** ou **Áudio (MP3)** com as setas
-4. O download será salvo em `downloads/downloaded_videos/<titulo>/<video|audio>/`
+1. Selecione **"Baixar vídeo individual"** com ↑↓ e `Enter`
+2. Cole a URL do vídeo e `Enter`
+3. Selecione **Vídeo (MP4)** ou **Áudio (MP3)** com ↑↓ e `Enter`
+4. Barra de progresso aparece durante o download
+5. Salvo em `downloads/downloaded_videos/<titulo>/<video|audio>/`
 
 ### Baixando uma playlist
 
-1. Selecione **"Baixar playlist completa"** e pressione `Enter`
-2. Cole a URL da playlist e pressione `Enter`
-3. Selecione **Vídeo (MP4)** ou **Áudio (MP3)** com as setas
-4. Os downloads serão salvos em `downloads/downloaded_playlists/<titulo>/<video|audio>/`
+1. Selecione **"Baixar playlist completa"** com ↑↓ e `Enter`
+2. Cole a URL da playlist e `Enter`
+3. Selecione **Vídeo (MP4)** ou **Áudio (MP3)** com ↑↓ e `Enter`
+4. Barra de progresso mostra avanço vídeo a vídeo
+5. Salvo em `downloads/downloaded_playlists/<titulo>/<video|audio>/`
 
 ## Estrutura do Projeto
 

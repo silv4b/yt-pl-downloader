@@ -1,8 +1,10 @@
 from __future__ import annotations
-from app.exceptions import FFmpegInstallError
+
 import platform
 import shutil
 import subprocess
+
+from app.exceptions import FFmpegInstallError
 
 
 def verify_ffmpeg_installed() -> bool:
