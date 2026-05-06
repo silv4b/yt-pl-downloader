@@ -1,3 +1,10 @@
+"""Utilitários para detecção e instalação do Deno.
+
+O Deno é um ambiente de execução JavaScript usado pelo yt-dlp
+para resolver desafios JS do YouTube, permitindo acesso a todos
+os formatos e resoluções de vídeo.
+"""
+
 from __future__ import annotations
 
 import os
@@ -9,6 +16,14 @@ from app.exceptions import FFmpegInstallError
 
 
 def verify_deno_installed() -> bool:
+    """Verifica se o Deno está disponível no sistema.
+
+    Verifica o PATH do sistema, a lista de pacotes do winget (Windows)
+    e diretórios comuns de instalação.
+
+    Returns:
+        True se o Deno for encontrado, False caso contrário.
+    """
     if shutil.which("deno") is not None:
         return True
 
@@ -37,6 +52,15 @@ def verify_deno_installed() -> bool:
 
 
 def install_deno() -> None:
+    """Instala o Deno usando o gerenciador de pacotes do sistema.
+
+    No Windows, usa o winget para instalar o DenoLand.Deno.
+    No Linux, baixa e executa o script oficial de instalação.
+
+    Raises:
+        FFmpegInstallError: Se o gerenciador de pacotes não for encontrado
+            ou a instalação falhar.
+    """
     system = platform.system()
 
     if system == "Windows":

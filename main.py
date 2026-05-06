@@ -1,3 +1,10 @@
+"""Aplicativo CLI do YouTube Downloader.
+
+Ponto de entrada do aplicativo. Gerencia o fluxo de interação com o usuário,
+verifica dependências (FFmpeg e Deno) e orquestra downloads de vídeos e
+playlists através da camada de serviços.
+"""
+
 from __future__ import annotations
 
 from app.cli.menu import (
@@ -21,6 +28,11 @@ from app.services.video_downloader import VideoDownloader
 
 
 def check_and_install_ffmpeg() -> bool:
+    """Verifica se o FFmpeg está instalado e oferece instalação se ausente.
+
+    Returns:
+        True se o FFmpeg estiver disponível, False se a instalação foi recusada ou falhou.
+    """
     if verify_ffmpeg_installed():
         return True
 
@@ -41,6 +53,14 @@ def check_and_install_ffmpeg() -> bool:
 
 
 def check_deno() -> bool:
+    """Verifica se o Deno está instalado e avisa o usuário se estiver ausente.
+
+    O Deno melhora a qualidade da extração do YouTube. Sem ele,
+    alguns formatos de vídeo podem não estar disponíveis.
+
+    Returns:
+        True se o Deno estiver disponível, False caso contrário.
+    """
     if verify_deno_installed():
         return True
 
@@ -54,6 +74,7 @@ def check_deno() -> bool:
 
 
 def handle_install_deno() -> None:
+    """Instala o Deno e notifica o usuário do resultado."""
     try:
         install_deno()
         print_success("Deno instalado com sucesso! Reinicie o aplicativo para aplicar.")
@@ -62,6 +83,11 @@ def handle_install_deno() -> None:
 
 
 def handle_video_download() -> None:
+    """Gerencia o fluxo interativo para download de um único vídeo.
+
+    Solicita URL e formato, executa o download e exibe o caminho
+    de saída em caso de sucesso ou mensagem de erro em caso de falha.
+    """
     url = prompt_url()
     if not url:
         print_error("URL vazia. Operação cancelada.")
@@ -79,6 +105,11 @@ def handle_video_download() -> None:
 
 
 def handle_playlist_download() -> None:
+    """Gerencia o fluxo interativo para download de uma playlist.
+
+    Solicita URL e formato, executa o download e exibe o caminho
+    de saída e quantidade de vídeos em caso de sucesso ou erro em caso de falha.
+    """
     url = prompt_url()
     if not url:
         print_error("URL vazia. Operação cancelada.")
@@ -96,6 +127,11 @@ def handle_playlist_download() -> None:
 
 
 def main() -> None:
+    """Ponto de entrada do aplicativo.
+
+    Inicializa a CLI, verifica dependências (FFmpeg e Deno)
+    e executa o loop principal de interação até o usuário escolher sair.
+    """
     clear_terminal()
     print_header("YouTube Downloader")
 

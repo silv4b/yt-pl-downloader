@@ -1,3 +1,9 @@
+"""Serviço de download de vídeo individual.
+
+Baixa um único vídeo do YouTube como MP4 ou extrai áudio como MP3,
+com barra de progresso do Rich mostrando bytes, velocidade e tempo restante.
+"""
+
 from __future__ import annotations
 
 from app.core.utils import sanitize_filename
@@ -6,7 +12,23 @@ from app.services.downloader import BaseDownloader
 
 
 class VideoDownloader(BaseDownloader):
+    """Baixa um único vídeo ou faixa de áudio do YouTube."""
+
     def download(self, url: str, is_audio: bool = False) -> VideoInfo:
+        """Baixa um único vídeo da URL fornecida.
+
+        Extrai metadados, cria o diretório de saída e baixa o arquivo
+        com uma barra de progresso do Rich mostrando velocidade,
+        bytes transferidos e tempo estimado restante.
+
+        Args:
+            url: URL do vídeo do YouTube.
+            is_audio: Se True, extrai áudio como MP3.
+                Se False, baixa como vídeo MP4.
+
+        Returns:
+            VideoInfo com título, URL, uploader e duração.
+        """
         from app.cli.menu import create_progress
 
         info = self._extract_info(url)
@@ -25,6 +47,8 @@ class VideoDownloader(BaseDownloader):
         file_type = "audio" if is_audio else "video"
 
         def make_hook(progress, task_id, known_total):
+            """Cria um hook de progresso que atualiza a barra do Rich."""
+
             def _hook(d: dict) -> None:
                 if d.get("status") == "downloading":
                     downloaded = d.get("downloaded_bytes", 0)

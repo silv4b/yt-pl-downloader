@@ -8,16 +8,19 @@ CLI para baixar vídeos individuais e playlists do YouTube em formato de vídeo 
 - **Download de playlists completas** — Baixa todos os vídeos de uma playlist
 - **Escolha de formato** — Vídeo (MP4) ou áudio (MP3)
 - **Organização automática** — Downloads organizados em pastas por título
+- **Deno integrado** — Verificação e instalação automática para melhorar extração do YouTube
 - **FFmpeg integrado** — Verificação e instalação automática do FFmpeg
 - **Interface interativa (TUI)** — Navegue com setas ↑↓ e Enter (`inquirer`), com output visual colorido (`Rich`)
-- **Barras de progresso** — Progresso detalhado com %, velocidade, tamanho e tempo restante
-- **Multiplataforma** — Funciona em Windows e Linux
+- **Barras de progresso duplas** — Progresso da playlist + progresso individual do vídeo com %, velocidade, tamanho e tempo restante
+- **Testes de integração** — Testes reais de download (MP4 e MP3) com isolamento em diretório temporário
+- **Docstrings completas** — Todo o código documentado em português
 
 ## Requisitos
 
 - **Python 3.12+**
 - **uv** — Gerenciador de pacotes moderno
 - **FFmpeg** — Instalado automaticamente pelo script se necessário
+- **Deno** (opcional) — Instalado automaticamente; melhora extração de formatos do YouTube
 
 ### Instalando o uv
 
@@ -93,17 +96,18 @@ Durante o download, uma barra de progresso é exibida:
 
 ```text
 yt-pl-downloader/
-├── main.py                        # Entry point
+├── main.py                        # Entry point (CLI)
 ├── pyproject.toml                 # Configuração do projeto
 ├── config.yaml                    # Configurações de paths e defaults
 │
 ├── app/
 │   ├── cli/                       # Interface de linha de comando
-│   │   └── menu.py                # Prompts e output de UI
+│   │   └── menu.py                # Prompts interativos e output visual
 │   │
 │   ├── core/                      # Infraestrutura
-│   │   ├── config.py              # DownloadConfig centralizado
+│   │   ├── config.py              # DownloadConfig centralizado (YAML)
 │   │   ├── ffmpeg_utils.py        # Verificação e instalação do FFmpeg
+│   │   ├── deno_utils.py          # Verificação e instalação do Deno
 │   │   ├── logger.py              # Logging estruturado
 │   │   └── utils.py               # Utilitários (sanitize, etc)
 │   │
@@ -112,7 +116,7 @@ yt-pl-downloader/
 │   │   └── playlist.py            # PlaylistInfo
 │   │
 │   ├── services/                  # Lógica de download
-│   │   ├── downloader.py          # Classe base abstrata
+│   │   ├── downloader.py          # Classe base abstrata + hooks
 │   │   ├── video_downloader.py    # Download de vídeo único
 │   │   └── playlist_downloader.py # Download de playlist
 │   │
@@ -120,10 +124,12 @@ yt-pl-downloader/
 │
 └── tests/                         # Testes com pytest
     ├── test_core/
-    │   ├── test_config.py
-    │   └── test_utils.py
-    └── test_models/
-        └── test_models.py
+    │   ├── test_config.py         # Config e carregamento YAML
+    │   └── test_utils.py          # Sanitização de nomes
+    ├── test_models/
+    │   └── test_models.py         # VideoInfo e PlaylistInfo
+    └── test_integration/
+        └── test_downloads.py      # Downloads reais (MP4/MP3)
 ```
 
 ## Comandos úteis
@@ -135,11 +141,17 @@ uv sync
 # Executar o projeto
 uv run python main.py
 
-# Rodar testes
-uv run pytest
+# Rodar testes unitários
+uv run pytest -m "not integration"
 
-# Rodar testes com verbose
+# Rodar todos os testes (inclui integração com downloads reais)
 uv run pytest tests/ -v
+
+# Rodar apenas testes de integração
+uv run pytest -m integration
+
+# Pular testes de integração (útil para CI rápido)
+SKIP_INTEGRATION=1 uv run pytest tests/ -v
 
 # Executar linter
 uv run ruff check .
@@ -187,9 +199,12 @@ git push origin v0.2.0
 ## Notas
 
 - O FFmpeg é necessário para conversão de formatos. O projeto verifica e oferece instalação automática
+- O Deno é opcional mas recomendado: melhora a extração de formatos do YouTube, permitindo acesso a mais resoluções
+- Sem o Deno, alguns vídeos podem não estar disponíveis na melhor qualidade; a opção de instalar aparece no menu
 - Os downloads são organizados automaticamente em `downloads/`
 - Títulos de vídeos e playlists são sanitizados para nomes de pasta válidos
 - Em playlists, vídeos falhos são pulados e o download continua
+- Os testes de integração realizam downloads reais; use `SKIP_INTEGRATION=1` para ignorá-los
 
 ## Licença
 

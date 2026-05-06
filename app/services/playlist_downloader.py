@@ -1,3 +1,10 @@
+"""Serviço de download de playlist.
+
+Baixa todos os vídeos de uma playlist do YouTube como MP4 ou MP3,
+com duas barras de progresso: uma para o progresso geral da playlist
+e outra para o vídeo atual sendo baixado.
+"""
+
 from __future__ import annotations
 
 from app.core.utils import sanitize_filename
@@ -8,7 +15,30 @@ from app.services.downloader import BaseDownloader
 
 
 class PlaylistDownloader(BaseDownloader):
+    """Baixa todos os vídeos de uma playlist do YouTube."""
+
     def download(self, url: str, is_audio: bool = False) -> PlaylistInfo:
+        """Baixa uma playlist inteira da URL fornecida.
+
+        Extrai metadados da playlist, itera por todos os vídeos e
+        baixa cada um com nomes de arquivo numerados. Vídeos que
+        falham ao baixar são ignorados sem interromper o processo.
+
+        Duas barras de progresso são exibidas:
+        - Geral: Progresso da playlist (vídeos completos / total)
+        - Atual: Download do vídeo individual (bytes, velocidade, ETA)
+
+        Args:
+            url: URL da playlist do YouTube.
+            is_audio: Se True, extrai áudio como MP3 para todos os vídeos.
+                Se False, baixa como vídeo MP4.
+
+        Returns:
+            PlaylistInfo com título, URL e lista de vídeos baixados.
+
+        Raises:
+            PlaylistExtractionError: Se a playlist não contiver vídeos.
+        """
         from app.cli.menu import create_playlist_progress
 
         info = self._extract_info(url)
@@ -51,6 +81,7 @@ class PlaylistDownloader(BaseDownloader):
                 ydl_opts["outtmpl"] = str(output_dir / f"{index:02d}_{video_title}.%(ext)s")
 
                 def hook(d: dict, vt=video_title, ks=known_size) -> None:
+                    """Atualiza as barras de progresso com o status do vídeo atual."""
                     if d.get("status") == "downloading":
                         downloaded = d.get("downloaded_bytes", 0)
                         total = d.get("total_bytes") or d.get("total_bytes_estimate") or ks

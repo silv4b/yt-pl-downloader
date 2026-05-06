@@ -1,3 +1,10 @@
+"""Classe base para operações de download do YouTube.
+
+Fornece funcionalidade compartilhada para extração de metadados,
+construção de opções do yt-dlp e execução de downloads com
+relatório de progresso através de hooks.
+"""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -11,10 +18,18 @@ from app.exceptions import DownloadError, InvalidURLError
 
 
 class ProgressHook(Protocol):
+    """Protocolo para funções que recebem atualizações de progresso do yt-dlp."""
+
     def __call__(self, status: dict[str, Any], /) -> None: ...
 
 
 class SilentLogger:
+    """Suprime toda saída de log do yt-dlp para manter o terminal limpo.
+
+    Usado junto com barras de progresso do Rich para evitar
+    que mensagens de log se misturem com a exibição de progresso.
+    """
+
     def debug(self, msg):
         pass
 
@@ -26,11 +41,35 @@ class SilentLogger:
 
 
 class BaseDownloader(ABC):
+    """Classe base abstrata para downloaders do YouTube.
+
+    Gerencia configuração, criação de diretórios, extração de metadados,
+    construção de opções do yt-dlp e execução de downloads.
+    Subclasses devem implementar o método download().
+    """
+
     def __init__(self, config: DownloadConfig | None = None) -> None:
+        """Inicializa o downloader com a configuração fornecida.
+
+        Args:
+            config: Instância de DownloadConfig. Cria uma padrão se não for fornecida.
+        """
         self.config = config or DownloadConfig()
         self.config.ensure_dirs()
 
     def _extract_info(self, url: str, download: bool = False) -> Any:
+        """Extrai metadados de vídeo ou playlist de uma URL do YouTube.
+
+        Args:
+            url: URL do vídeo ou playlist do YouTube.
+            download: Se True, também baixa a mídia (padrão: apenas metadados).
+
+        Returns:
+            Dicionário contendo metadados extraídos pelo yt-dlp.
+
+        Raises:
+            InvalidURLError: Se a URL for inválida ou inacessível.
+        """
         try:
             opts = {"quiet": True, "no_warnings": True, "logger": SilentLogger()}
             with yt_dlp.YoutubeDL(opts) as ydl:
@@ -44,6 +83,17 @@ class BaseDownloader(ABC):
         is_audio: bool = False,
         progress_hook: ProgressHook | None = None,
     ) -> dict[str, Any]:
+        """Constrói o dicionário de configuração do yt-dlp para o tipo de download.
+
+        Args:
+            output_path: Diretório onde o arquivo baixado será salvo.
+            is_audio: Se True, configura extração de áudio para MP3.
+                Se False, configura download de vídeo como MP4.
+            progress_hook: Função de callback opcional para atualizações de progresso.
+
+        Returns:
+            Dicionário de opções do yt-dlp pronto para uso.
+        """
         base_opts: dict[str, Any] = {
             "quiet": True,
             "no_warnings": True,
@@ -76,6 +126,15 @@ class BaseDownloader(ABC):
             }
 
     def _download(self, url: str, ydl_opts: dict[str, Any]) -> None:
+        """Executa o download usando yt-dlp com as opções fornecidas.
+
+        Args:
+            url: URL do YouTube para baixar.
+            ydl_opts: Dicionário de configuração do _get_ydl_options().
+
+        Raises:
+            DownloadError: Se o download falhar.
+        """
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([url])
@@ -83,4 +142,14 @@ class BaseDownloader(ABC):
             raise DownloadError(f"Download failed: {e}") from e
 
     @abstractmethod
-    def download(self, url: str, is_audio: bool = False) -> Any: ...
+    def download(self, url: str, is_audio: bool = False) -> Any:
+        """Baixa a URL fornecida.
+
+        Args:
+            url: URL do vídeo ou playlist do YouTube.
+            is_audio: Se True, baixa como áudio (MP3). Senão como vídeo (MP4).
+
+        Returns:
+            VideoInfo ou PlaylistInfo com os resultados do download.
+        """
+        ...
