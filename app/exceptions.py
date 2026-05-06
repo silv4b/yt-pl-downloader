@@ -1,24 +1,30 @@
+"""Exceções customizadas para erros relacionados a downloads.
+
+Todas as exceções herdam de DownloadError para permitir
+capturar qualquer falha de download com um único bloco except.
+"""
+
 from __future__ import annotations
 
 
 class DownloadError(Exception):
-    """Base exception for all download-related errors."""
+    """Exceção base para todos os erros relacionados a downloads."""
 
 
 class FFmpegNotFoundError(DownloadError):
-    """Raised when FFmpeg is not found on the system."""
+    """Lançada quando o FFmpeg não é encontrado no sistema e é necessário."""
 
 
 class FFmpegInstallError(DownloadError):
-    """Raised when FFmpeg installation fails."""
+    """Lançada quando a instalação automática do FFmpeg falha."""
 
 
 class InvalidURLError(DownloadError):
-    """Raised when the provided URL is invalid."""
+    """Lançada quando a URL fornecida é inválida ou inacessível."""
 
 
 class PlaylistExtractionError(DownloadError):
-    """Raised when playlist metadata cannot be extracted."""
+    """Lançada quando os metadados da playlist não podem ser extraídos da URL."""
 
 
 __all__ = [

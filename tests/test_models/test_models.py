@@ -1,8 +1,11 @@
+"""Testes unitários para os modelos de dados VideoInfo e PlaylistInfo."""
+
 from app.models.playlist import PlaylistInfo
 from app.models.video import VideoInfo
 
 
 def test_video_info_creation():
+    """Verifica a criação de VideoInfo com campos obrigatórios."""
     video = VideoInfo(title="Test", url="https://example.com")
     assert video.title == "Test"
     assert video.url == "https://example.com"
@@ -11,6 +14,7 @@ def test_video_info_creation():
 
 
 def test_video_info_with_all_fields():
+    """Verifica a criação de VideoInfo com todos os campos preenchidos."""
     video = VideoInfo(
         title="Test",
         url="https://example.com",
@@ -23,6 +27,7 @@ def test_video_info_with_all_fields():
 
 
 def test_playlist_info_creation():
+    """Verifica a criação de PlaylistInfo vazia."""
     playlist = PlaylistInfo(title="My Playlist", url="https://example.com/playlist")
     assert playlist.title == "My Playlist"
     assert playlist.total_videos == 0
@@ -30,6 +35,7 @@ def test_playlist_info_creation():
 
 
 def test_playlist_info_with_videos():
+    """Verifica a criação de PlaylistInfo com vídeos."""
     videos = [
         VideoInfo(title="Video 1", url="https://example.com/1"),
         VideoInfo(title="Video 2", url="https://example.com/2"),
