@@ -21,6 +21,9 @@ dev = [
 ]
 
 [tool.poe.tasks]
+# build.py command
+builder = "python build.py"
+
 # coverage package commands
 cov-run = "uv run coverage run --source=. -m pytest"
 cov-report = "uv run coverage report"
