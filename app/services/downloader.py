@@ -7,7 +7,6 @@ relatório de progresso através de hooks.
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -40,12 +39,11 @@ class SilentLogger:
         pass
 
 
-class BaseDownloader(ABC):
-    """Classe base abstrata para downloaders do YouTube.
+class BaseDownloader:
+    """Classe base para downloaders do YouTube.
 
     Gerencia configuração, criação de diretórios, extração de metadados,
     construção de opções do yt-dlp e execução de downloads.
-    Subclasses devem implementar o método download().
     """
 
     def __init__(self, config: DownloadConfig | None = None) -> None:
@@ -82,6 +80,7 @@ class BaseDownloader(ABC):
         output_path: Path,
         is_audio: bool = False,
         progress_hook: ProgressHook | None = None,
+        quality: str | None = None,
     ) -> dict[str, Any]:
         """Constrói o dicionário de configuração do yt-dlp para o tipo de download.
 
@@ -90,6 +89,9 @@ class BaseDownloader(ABC):
             is_audio: Se True, configura extração de áudio para MP3.
                 Se False, configura download de vídeo como MP4.
             progress_hook: Função de callback opcional para atualizações de progresso.
+            quality: Filtro de formato do yt-dlp para qualidade específica.
+                Ex: "bestvideo[height<=1080]+bestaudio/best".
+                Se None, usa o melhor formato disponível.
 
         Returns:
             Dicionário de opções do yt-dlp pronto para uso.
@@ -116,14 +118,14 @@ class BaseDownloader(ABC):
                 ],
                 "extractaudio": True,
             }
-        else:
-            return {
-                **base_opts,
-                "format": "best[ext=mp4]/bestvideo+bestaudio/best",
-                "merge_output_format": "mp4",
-                "outtmpl": str(output_path / "%(title)s.%(ext)s"),
-                "postprocessors": [{"key": "FFmpegVideoConvertor", "preferedformat": "mp4"}],
-            }
+
+        video_format = quality or "best[ext=mp4]/bestvideo+bestaudio/best"
+        return {
+            **base_opts,
+            "format": f"{video_format}[vcodec^=avc1]/bestvideo[vcodec^=avc1]+bestaudio/best[ext=mp4]/best",
+            "merge_output_format": "mp4",
+            "outtmpl": str(output_path / "%(title)s.%(ext)s"),
+        }
 
     def _download(self, url: str, ydl_opts: dict[str, Any]) -> None:
         """Executa o download usando yt-dlp com as opções fornecidas.
@@ -140,16 +142,3 @@ class BaseDownloader(ABC):
                 ydl.download([url])
         except yt_dlp.utils.DownloadError as e:
             raise DownloadError(f"Download failed: {e}") from e
-
-    @abstractmethod
-    def download(self, url: str, is_audio: bool = False) -> Any:
-        """Baixa a URL fornecida.
-
-        Args:
-            url: URL do vídeo ou playlist do YouTube.
-            is_audio: Se True, baixa como áudio (MP3). Senão como vídeo (MP4).
-
-        Returns:
-            VideoInfo ou PlaylistInfo com os resultados do download.
-        """
-        ...

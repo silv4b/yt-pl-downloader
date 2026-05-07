@@ -6,6 +6,10 @@ com Rich para output visual (painéis, barras de progresso, regras coloridas).
 
 from __future__ import annotations
 
+import os
+import platform
+import subprocess
+
 import inquirer
 from rich.console import Console
 from rich.panel import Panel
@@ -19,6 +23,7 @@ from rich.progress import (
     TransferSpeedColumn,
 )
 from rich.rule import Rule
+from rich.table import Table
 
 console = Console()
 
@@ -179,6 +184,96 @@ def print_warning(message: str) -> None:
             title="⚠ Atenção",
         )
     )
+
+
+def display_playlist_entries(entries: list) -> None:
+    """Exibe a lista de vídeos da playlist em uma tabela estilizada.
+
+    Args:
+        entries: Lista de dicionários de metadados do yt-dlp.
+    """
+    table = Table(title="Vídeos na playlist", show_lines=True)
+    table.add_column("#", justify="right", style="cyan", width=4)
+    table.add_column("Título", style="white")
+    table.add_column("Status", justify="center", width=12)
+
+    for i, entry in enumerate(entries, start=1):
+        if entry is None:
+            table.add_row(str(i), "[dim]Indisponível[/dim]", "—")
+            continue
+        title = entry.get("title", f"Vídeo {i}")
+        table.add_row(str(i), title, "[yellow]Pendente[/yellow]")
+
+    console.print()
+    console.print(table)
+    console.print()
+
+
+def update_playlist_status(entries: list, completed: set, failed: set, downloading_idx: int | None = None) -> None:
+    """Atualiza a tabela de status da playlist refletindo o progresso.
+
+    Args:
+        entries: Lista de dicionários de metadados do yt-dlp.
+        completed: Índices dos vídeos concluídos.
+        failed: Índices dos vídeos com falha.
+        downloading_idx: Índice do vídeo sendo baixado (None se nenhum).
+    """
+    console.print()
+    table = Table(title="Progresso da playlist", show_lines=True)
+    table.add_column("#", justify="right", style="cyan", width=4)
+    table.add_column("Título", style="white")
+    table.add_column("Status", justify="center", width=14)
+
+    for i, entry in enumerate(entries, start=1):
+        if entry is None:
+            table.add_row(str(i), "[dim]Indisponível[/dim]", "—")
+            continue
+        title = entry.get("title", f"Vídeo {i}")
+        if i in completed:
+            status = "[bold green]✓ Concluído[/bold green]"
+        elif i in failed:
+            status = "[bold red]✗ Falhou[/bold red]"
+        elif i == downloading_idx:
+            status = "[bold yellow]⠋ Baixando...[/bold yellow]"
+        else:
+            status = "[dim]Pendente[/dim]"
+        table.add_row(str(i), title, status)
+
+    console.print(table)
+
+
+def prompt_open_folder(path: str) -> bool:
+    """Pergunta ao usuário se deseja abrir a pasta de download.
+
+    Args:
+        path: Caminho da pasta a ser aberta.
+
+    Returns:
+        True se o usuário deseja abrir a pasta.
+    """
+    console.print()
+    questions = [
+        inquirer.Confirm(
+            "open",
+            message=f"Deseja abrir a pasta de download? ({path})",
+        )
+    ]
+    return _prompt(questions)["open"]
+
+
+def open_folder(path: str) -> None:
+    """Abre a pasta no explorador de arquivos do sistema operacional.
+
+    Args:
+        path: Caminho da pasta a ser aberta.
+    """
+    system = platform.system()
+    if system == "Windows":
+        os.startfile(path)
+    elif system == "Darwin":
+        subprocess.Popen(["open", path])
+    else:
+        subprocess.Popen(["xdg-open", path])
 
 
 def create_progress() -> Progress:

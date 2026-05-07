@@ -73,7 +73,7 @@ O projeto combina **inquirer** para navegação com setas e **Rich** para output
 Durante o download, uma barra de progresso é exibida:
 
 ```text
-⠋ vídeo: Meu Vídeo Legal  ████████░░░░░░░░░░░░░  35%  15.2/43.7MB  5.3MB/s  0:00:05
+⠴ video: Meu Vídeo Legal ━━━━━━━━━━━━━━━━━━━━━━━╸━━━ 72.1/76.3 MiB 7.4 MB/s 0:00:01
 ```
 
 ### Baixando um vídeo individual
@@ -168,23 +168,51 @@ uv add --dev <pacote>
 
 ## Build (Executável)
 
-### Usando PyInstaller
+### Usando build.py (Recomendado)
+
+O projeto inclui um script de build que configura automaticamente todas as opções do PyInstaller necessárias:
 
 ```bash
-# Instalar PyInstaller (já incluído nas dev dependencies)
-uv sync
-
-# Build
-uv run pyinstaller --onefile --name yt-pl-downloader main.py
+# Gerar executável para a plataforma atual
+uv run python build.py
 ```
 
-O executável será criado na pasta `dist/`.
+O script automaticamente:
+
+1. Limpa builds anteriores (`build/`, `dist/`)
+2. Detecta a plataforma e adiciona o sufixo correto (`-win` ou `-linux`)
+3. Empacota todas as dependências (`yt-dlp`, `Rich`, `inquirer`, `PyYAML`, `readchar`)
+4. Inclui metadados necessários para evitar erros de importação
+
+O executável será criado em `dist/`:
+
+- **Windows:** `dist/yt-pl-downloader-win.exe` (~25 MB)
+- **Linux:** `dist/yt-pl-downloader-linux`
+
+#### Build manual com PyInstaller
+
+Se preferir usar PyInstaller diretamente, use estes parâmetros:
+
+```bash
+uv run pyinstaller --onefile \
+  --name yt-pl-downloader \
+  --collect-all yt_dlp \
+  --collect-all rich \
+  --hidden-import inquirer \
+  --hidden-import yaml \
+  --hidden-import readchar \
+  --copy-metadata readchar \
+  --copy-metadata inquirer \
+  main.py
+```
+
+> **Importante:** As flags `--copy-metadata readchar` e `--copy-metadata inquirer` são essenciais. Sem elas, o executável falha ao iniciar com `PackageNotFoundError`.
 
 ### No Linux
 
 ```bash
 # Dar permissão de execução
-chmod +x dist/yt-pl-downloader
+chmod +x dist/yt-pl-downloader-linux
 ```
 
 ## CI/CD
