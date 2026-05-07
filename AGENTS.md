@@ -98,6 +98,20 @@ yt-pl-downloader/
 - Use `_prompt()` (wrapper em `app/cli/menu.py`) que levanta `KeyboardInterrupt`
 - Nunca acesse diretamente `inquirer.prompt(questions)["key"]`
 
+### 7. Instalação de Dependências com Feedback Visual
+
+- Comandos de instalação (`apt`, `curl | sh`, `winget`) **nunca** devem usar
+  `capture_output=True` — o usuário precisa ver o progresso no terminal
+- Após instalar, adicione o binário ao `os.environ["PATH"]` do processo atual
+  para que `shutil.which()` funcione imediatamente
+- Em Linux, após instalar em diretórios não-PATH (`~/.deno/bin`), adicione a
+  entrada ao perfil do shell (`.bashrc`/`.zshrc`) via função auxiliar
+  (`_add_to_profile`)
+- Trate erros de escrita do profile como não-críticos (o PATH do processo
+  já foi atualizado)
+- Use exceções específicas para cada ferramenta (`DenoInstallError`,
+  `FFmpegInstallError`) em vez de `Exception` genérico
+
 ## Convenções de Código
 
 ### Imports
@@ -136,9 +150,10 @@ Todas em `app/exceptions.py`:
 
 | Exceção | Quando usar |
 |---|---|
+| `DenoInstallError` | Falha na instalação automática do Deno |
 | `DownloadError` | Base para todos os erros de download |
 | `FFmpegNotFoundError` | FFmpeg não encontrado no PATH |
-| `FFmpegInstallError` | Falha na instalação automática do FFmpeg/Deno |
+| `FFmpegInstallError` | Falha na instalação automática do FFmpeg |
 | `InvalidURLError` | URL inválida ou inacessível |
 | `PlaylistExtractionError` | Playlist sem vídeos |
 
@@ -184,7 +199,15 @@ O script automaticamente:
 - Inclui `--copy-metadata readchar`, `--copy-metadata inquirer`
 - O executável vai para `dist/`
 
-## GitHub Actions
+## Girhub
+
+### Commits
+
+Após cada grande atualização, for sinalizado que determinado problema foi resolvido, sugira commits enxutos, usando padrões de commit semântico como: feat, fix, chore, doc, test, build etc.
+
+O commit só deve ser de fato feito quando for explicitamente solicitado, do contrário, apenas deve ser sugerida a mensagem.
+
+### GitHub Actions
 
 Workflows em `.github/workflows/`:
 

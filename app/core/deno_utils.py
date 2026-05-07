@@ -48,11 +48,11 @@ def verify_deno_installed() -> bool:
             if os.path.isfile(path):
                 return True
 
-    deno_in_home = os.path.expanduser("~/.deno/bin/deno")
-    if os.path.isfile(deno_in_home):
-        deno_bin = os.path.dirname(deno_in_home)
-        os.environ["PATH"] = f"{deno_bin}:{os.environ.get('PATH', '')}"
-        return True
+    deno_bin_dir = os.path.expanduser("~/.deno/bin")
+    for name in ("deno", "deno.exe"):
+        if os.path.isfile(os.path.join(deno_bin_dir, name)):
+            os.environ["PATH"] = f"{deno_bin_dir}:{os.environ.get('PATH', '')}"
+            return True
 
     return False
 
@@ -91,9 +91,11 @@ def install_deno() -> None:
     except FileNotFoundError as e:
         raise DenoInstallError(f"Gerenciador de pacotes não encontrado: {e}") from e
 
-    deno_path = os.path.expanduser("~/.deno/bin")
-    if os.path.isfile(os.path.join(deno_path, "deno")):
-        os.environ["PATH"] = f"{deno_path}:{os.environ.get('PATH', '')}"
+    deno_bin_dir = os.path.expanduser("~/.deno/bin")
+    for name in ("deno", "deno.exe"):
+        if os.path.isfile(os.path.join(deno_bin_dir, name)):
+            os.environ["PATH"] = f"{deno_bin_dir}:{os.environ.get('PATH', '')}"
+            break
 
     if system == "Linux":
         _add_deno_to_profile()
