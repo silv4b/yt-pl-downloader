@@ -47,13 +47,11 @@ def install_ffmpeg() -> None:
     elif system == "Linux":
         cmd = ["sudo", "apt", "install", "-y", "ffmpeg"]
     else:
-        raise FFmpegInstallError(f"Unsupported operating system: {system}")
+        raise FFmpegInstallError(f"Sistema operacional não suportado: {system}")
 
     try:
-        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
-        if result.returncode != 0:
-            raise FFmpegInstallError(f"FFmpeg installation failed: {result.stderr}")
+        subprocess.run(cmd, check=True)
     except subprocess.CalledProcessError as e:
-        raise FFmpegInstallError(f"FFmpeg installation failed: {e.stderr}") from e
+        raise FFmpegInstallError(f"Falha na instalação do FFmpeg: {e}") from e
     except FileNotFoundError as e:
-        raise FFmpegInstallError(f"Package manager not found: {e}") from e
+        raise FFmpegInstallError(f"Gerenciador de pacotes não encontrado: {e}") from e

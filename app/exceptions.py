@@ -19,6 +19,10 @@ class FFmpegInstallError(DownloadError):
     """Lançada quando a instalação automática do FFmpeg falha."""
 
 
+class DenoInstallError(DownloadError):
+    """Lançada quando a instalação automática do Deno falha."""
+
+
 class InvalidURLError(DownloadError):
     """Lançada quando a URL fornecida é inválida ou inacessível."""
 
@@ -28,6 +32,7 @@ class PlaylistExtractionError(DownloadError):
 
 
 __all__ = [
+    "DenoInstallError",
     "DownloadError",
     "FFmpegInstallError",
     "FFmpegNotFoundError",

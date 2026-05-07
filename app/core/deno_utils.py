@@ -12,7 +12,7 @@ import platform
 import shutil
 import subprocess
 
-from app.exceptions import FFmpegInstallError
+from app.exceptions import DenoInstallError
 
 
 def verify_deno_installed() -> bool:
@@ -48,6 +48,12 @@ def verify_deno_installed() -> bool:
             if os.path.isfile(path):
                 return True
 
+    deno_in_home = os.path.expanduser("~/.deno/bin/deno")
+    if os.path.isfile(deno_in_home):
+        deno_bin = os.path.dirname(deno_in_home)
+        os.environ["PATH"] = f"{deno_bin}:{os.environ.get('PATH', '')}"
+        return True
+
     return False
 
 
@@ -58,7 +64,7 @@ def install_deno() -> None:
     No Linux, baixa e executa o script oficial de instalação.
 
     Raises:
-        FFmpegInstallError: Se o gerenciador de pacotes não for encontrado
+        DenoInstallError: Se o gerenciador de pacotes não for encontrado
             ou a instalação falhar.
     """
     system = platform.system()
@@ -76,13 +82,65 @@ def install_deno() -> None:
     elif system == "Linux":
         cmd = ["sh", "-c", "curl -fsSL https://deno.land/install.sh | sh"]
     else:
-        raise FFmpegInstallError(f"Unsupported operating system: {system}")
+        raise DenoInstallError(f"Sistema operacional não suportado: {system}")
 
     try:
-        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
-        if result.returncode != 0:
-            raise FFmpegInstallError(f"Deno installation failed: {result.stderr}")
+        subprocess.run(cmd, check=True)
     except subprocess.CalledProcessError as e:
-        raise FFmpegInstallError(f"Deno installation failed: {e.stderr}") from e
+        raise DenoInstallError(f"Falha na instalação do Deno: {e}") from e
     except FileNotFoundError as e:
-        raise FFmpegInstallError(f"Package manager not found: {e}") from e
+        raise DenoInstallError(f"Gerenciador de pacotes não encontrado: {e}") from e
+
+    deno_path = os.path.expanduser("~/.deno/bin")
+    if os.path.isfile(os.path.join(deno_path, "deno")):
+        os.environ["PATH"] = f"{deno_path}:{os.environ.get('PATH', '')}"
+
+    if system == "Linux":
+        _add_deno_to_profile()
+
+
+def _add_deno_to_profile() -> None:
+    """Adiciona ~/.deno/bin ao PATH do shell no arquivo de perfil.
+
+    Adiciona a linha 'export PATH="$HOME/.deno/bin:$PATH"' ao arquivo
+    de configuração do shell (.bashrc, .zshrc ou .profile), permitindo
+    que o comando 'deno' fique disponível em novos terminais.
+    """
+    path_line = 'export PATH="$HOME/.deno/bin:$PATH"'
+    shell = os.environ.get("SHELL", "")
+    home = os.path.expanduser("~")
+
+    if shell.endswith("zsh"):
+        candidates = [
+            os.path.join(home, ".zshenv"),
+            os.path.join(home, ".zshrc"),
+        ]
+    elif shell.endswith("bash"):
+        candidates = [
+            os.path.join(home, ".bashrc"),
+            os.path.join(home, ".bash_profile"),
+        ]
+    else:
+        candidates = [os.path.join(home, ".profile")]
+
+    config_file = None
+    for candidate in candidates:
+        if os.path.isfile(candidate):
+            config_file = candidate
+            break
+
+    if config_file is None:
+        config_file = candidates[0]
+
+    try:
+        with open(config_file) as f:
+            if path_line in f.read():
+                return
+    except FileNotFoundError:
+        pass
+
+    try:
+        with open(config_file, "a") as f:
+            f.write(f"\n# Adicionado por yt-pl-downloader\n{path_line}\n")
+    except OSError:
+        pass

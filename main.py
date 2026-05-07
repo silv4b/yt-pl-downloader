@@ -27,7 +27,7 @@ from app.core.config import config
 from app.core.deno_utils import install_deno, verify_deno_installed
 from app.core.ffmpeg_utils import install_ffmpeg, verify_ffmpeg_installed
 from app.core.utils import clear_terminal, sanitize_filename
-from app.exceptions import DownloadError, FFmpegInstallError
+from app.exceptions import DenoInstallError, DownloadError, FFmpegInstallError
 from app.services.playlist_downloader import PlaylistDownloader
 from app.services.video_downloader import VideoDownloader
 
@@ -94,7 +94,7 @@ def handle_install_deno() -> None:
     try:
         install_deno()
         print_success("Deno instalado com sucesso! Reinicie o aplicativo para aplicar.")
-    except Exception as e:
+    except DenoInstallError as e:
         print_error(f"Falha na instalação: {e}")
 
 

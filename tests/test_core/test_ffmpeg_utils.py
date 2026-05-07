@@ -1,5 +1,6 @@
 """Testes unitários para detecção e instalação do FFmpeg."""
 
+import subprocess
 from unittest.mock import patch
 
 import pytest
@@ -47,16 +48,15 @@ def test_install_ffmpeg_linux():
 def test_install_ffmpeg_unsupported_os():
     """Verifica que levanta exceção para sistemas não suportados."""
     with patch("platform.system", return_value="FreeBSD"):
-        with pytest.raises(FFmpegInstallError, match="Unsupported operating system"):
+        with pytest.raises(FFmpegInstallError, match="não suportado"):
             install_ffmpeg()
 
 
 def test_install_ffmpeg_raises_on_failure():
     """Verifica que levanta exceção quando instalação falha."""
-    mock_result = type("obj", (object,), {"returncode": 1, "stderr": "error"})()
     with patch("platform.system", return_value="Windows"):
-        with patch("subprocess.run", return_value=mock_result):
-            with pytest.raises(FFmpegInstallError, match="installation failed"):
+        with patch("subprocess.run", side_effect=subprocess.CalledProcessError(1, ["winget"])):
+            with pytest.raises(FFmpegInstallError, match="Falha na instalação"):
                 install_ffmpeg()
 
 
@@ -64,7 +64,7 @@ def test_install_ffmpeg_raises_on_file_not_found():
     """Verifica que levanta exceção quando gerenciador não é encontrado."""
     with patch("platform.system", return_value="Windows"):
         with patch("subprocess.run", side_effect=FileNotFoundError):
-            with pytest.raises(FFmpegInstallError, match="not found"):
+            with pytest.raises(FFmpegInstallError, match="não encontrado"):
                 install_ffmpeg()
 
 
