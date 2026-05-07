@@ -2,6 +2,8 @@ from .menu import (
     console,
     create_playlist_progress,
     create_progress,
+    display_playlist_entries,
+    open_folder,
     print_error,
     print_header,
     print_info,
@@ -10,7 +12,9 @@ from .menu import (
     print_warning,
     prompt_ffmpeg_install,
     prompt_format,
+    prompt_open_folder,
     prompt_url,
+    update_playlist_status,
 )
 from .quality import prompt_quality
 
@@ -18,6 +22,8 @@ __all__ = [
     "console",
     "create_playlist_progress",
     "create_progress",
+    "display_playlist_entries",
+    "open_folder",
     "print_error",
     "print_header",
     "print_info",
@@ -26,6 +32,8 @@ __all__ = [
     "print_warning",
     "prompt_ffmpeg_install",
     "prompt_format",
+    "prompt_open_folder",
     "prompt_quality",
     "prompt_url",
+    "update_playlist_status",
 ]

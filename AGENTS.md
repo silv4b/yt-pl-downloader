@@ -118,6 +118,14 @@ yt-pl-downloader/
 - Use `|` para união de tipos (Python 3.10+)
 - Use `Protocol` para callbacks (ex: `ProgressHook`)
 
+### Testes para Novas Funcionalidades
+
+- **Toda nova funcionalidade deve ter testes unitários correspondentes**
+- Testes devem cobrir o caso principal e pelo menos um caso de erro
+- Funções de UI (que usam `inquirer` ou `Console`) devem usar mocks para não depender de input do usuário
+- Funções que fazem chamadas de rede (yt-dlp) devem mockar `yt_dlp.YoutubeDL`
+- Organize os testes em `tests/test_<modulo>/` seguindo a mesma estrutura do `app/`
+
 ### Linha Máxima
 
 - 120 caracteres (configurado no `pyproject.toml`)
