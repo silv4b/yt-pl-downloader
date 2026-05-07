@@ -1,5 +1,11 @@
 # YouTube Downloader
 
+![License](https://img.shields.io/github/license/silv4b/pip-cam)
+![Release](https://img.shields.io/github/v/release/silv4b/pip-cam)
+![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat&logo=windows&logoColor=white)
+![Linux](https://img.shields.io/badge/Linux-E95420?style=flat)
+![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat&logo=python&logoColor=white)
+
 CLI para baixar vídeos individuais e playlists do YouTube em formato de vídeo (MP4) ou áudio (MP3).
 
 ## Recursos
